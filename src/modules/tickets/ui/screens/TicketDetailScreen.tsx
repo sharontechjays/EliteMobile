@@ -169,6 +169,9 @@ export function TicketDetailScreen({ ticketId, onGoTickets, onGoNotes, onGoTrave
                 ))}
               </View>
             )}
+            {/* Always tappable rather than disabled pre-job-start — the "no active ticket" case
+                is refused by the usecase and surfaced via attachmentErrorMessage above, so the
+                crew leader sees the actual reason instead of a silently inert button. */}
             <View style={styles.attachButtonsRow}>
               <Pressable onPress={handlers.onCapturePhoto} style={styles.attachButton}>
                 <Text style={styles.attachButtonText}>{t.attachPhotoButton}</Text>

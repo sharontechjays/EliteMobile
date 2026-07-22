@@ -171,6 +171,10 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mealTimerId, jobTimerId]);
 
+  // "Active ticket" (the capture entry condition) maps onto this screen's existing jobRunning
+  // concept — the job clock has to actually be running, not merely "on this ticket's screen" —
+  // so attaching media before Start Job (or after Stop Job) is refused the same way starting a
+  // meal break or ending one out of order already is elsewhere in this view model.
   const onCaptureMedia = useCallback(
     async (kind: TicketAttachmentKind) => {
       const result = await new CaptureTicketAttachmentUseCase(

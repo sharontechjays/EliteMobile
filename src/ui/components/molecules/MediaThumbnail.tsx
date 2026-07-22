@@ -14,6 +14,9 @@ interface MediaThumbnailProps {
 export function MediaThumbnail({ media, onPress }: MediaThumbnailProps) {
   return (
     <Pressable onPress={onPress} style={styles.container}>
+      {/* thumbnailUri is the photo itself for a photo, or a generated still frame for a video
+          (see MediaCapture.port.ts) — either way it's always a real, renderable image, never a
+          placeholder, so the play glyph below is only ever an overlay on top of it. */}
       <Image source={{ uri: media.thumbnailUri }} style={styles.media} contentFit="cover" cachePolicy="memory-disk" />
       {media.kind === "video" && (
         <View style={styles.playGlyphOverlay}>
