@@ -2,6 +2,7 @@
 /.expo
 /.maestro
 /.superpowers
+/.claude
 /.vscode
 /__mocks__
 node_modules
