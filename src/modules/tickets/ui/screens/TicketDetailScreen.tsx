@@ -4,6 +4,8 @@ import { ScreenBackground } from "@/ui/components/organisms/ScreenBackground";
 import { BackButton } from "@/ui/components/atoms/BackButton";
 import { GlassSurface } from "@/ui/components/atoms/GlassSurface";
 import { MapPreview } from "@/ui/components/molecules/MapPreview";
+import { MediaThumbnail } from "@/ui/components/molecules/MediaThumbnail";
+import { MediaPreviewModal } from "@/ui/components/organisms/MediaPreviewModal";
 import { colors } from "@/ui/theme/colors";
 import { typography, fontMono } from "@/ui/theme/typography";
 import { SCREEN_TOP_INSET_DIRECT } from "@/ui/theme/layout";
@@ -138,11 +140,56 @@ export function TicketDetailScreen({ ticketId, onGoTickets, onGoNotes, onGoTrave
             </View>
           )}
 
+          <View>
+            <Text style={[typography.sectionLabel, { color: colors.faint, marginBottom: 7 }]}>
+              {t.attachmentsLabel}
+            </Text>
+            {state.attachmentErrorMessage && (
+              <View style={styles.attachmentErrorBanner}>
+                <Text style={styles.attachmentErrorText}>{state.attachmentErrorMessage}</Text>
+                {state.attachmentErrorIsPermission ? (
+                  <Pressable onPress={handlers.onOpenSettingsForPermission}>
+                    <Text style={styles.attachmentErrorAction}>{t.attachmentErrorOpenSettingsButton}</Text>
+                  </Pressable>
+                ) : (
+                  <Pressable onPress={handlers.onDismissAttachmentError}>
+                    <Text style={styles.attachmentErrorDismiss}>✕</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+            {state.attachments.length > 0 && (
+              <View style={styles.attachmentsRow}>
+                {state.attachments.map((attachment) => (
+                  <MediaThumbnail
+                    key={attachment.id}
+                    media={attachment}
+                    onPress={() => handlers.onPreviewAttachment(attachment)}
+                  />
+                ))}
+              </View>
+            )}
+            <View style={styles.attachButtonsRow}>
+              <Pressable onPress={handlers.onCapturePhoto} style={styles.attachButton}>
+                <Text style={styles.attachButtonText}>{t.attachPhotoButton}</Text>
+              </Pressable>
+              <Pressable onPress={handlers.onCaptureVideo} style={styles.attachButton}>
+                <Text style={styles.attachButtonText}>{t.attachVideoButton}</Text>
+              </Pressable>
+            </View>
+          </View>
+
           <Pressable onPress={handlers.onGoNotes} style={styles.notesButton}>
             <Text style={styles.notesButtonText}>{t.notesButton}</Text>
           </Pressable>
         </GlassSurface>
       </ScrollView>
+
+      <MediaPreviewModal
+        media={state.previewAttachment}
+        closeLabel={t.mediaPreviewCloseButton}
+        onClose={handlers.onClosePreview}
+      />
     </ScreenBackground>
   );
 }
@@ -162,6 +209,44 @@ const styles = StyleSheet.create({
     color: colors.dim,
   },
   crewRow: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
+  attachmentsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8 },
+  attachButtonsRow: { flexDirection: "row", gap: 9 },
+  attachButton: {
+    flex: 1,
+    paddingVertical: 11,
+    borderRadius: 11,
+    backgroundColor: colors.paper,
+    borderWidth: 1,
+    borderColor: colors.progressTrack,
+    alignItems: "center",
+  },
+  attachButtonText: {
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    color: colors.ink,
+    textTransform: "uppercase",
+  },
+  attachmentErrorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.offBg,
+    borderWidth: 1,
+    borderColor: colors.offBorder,
+    borderRadius: 11,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  attachmentErrorText: { flex: 1, fontSize: 12, color: colors.off, marginRight: 8 },
+  attachmentErrorDismiss: { fontSize: 13, color: colors.off, fontWeight: "700" },
+  attachmentErrorAction: {
+    fontSize: 11.5,
+    fontWeight: "800",
+    color: colors.off,
+    textDecorationLine: "underline",
+  },
   crewChip: {
     flexDirection: "row",
     alignItems: "center",

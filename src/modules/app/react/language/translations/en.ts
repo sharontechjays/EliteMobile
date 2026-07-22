@@ -169,6 +169,14 @@ export const en: Translations = {
     mealBreakStartedBody: "Job time is paused until the break ends.",
     mealBreakLoggedTitle: "Meal break logged",
     mealBreakLoggedBody: (value) => `${value} recorded.`,
+    attachmentsLabel: "Photos & videos",
+    attachPhotoButton: "Photo",
+    attachVideoButton: "Video",
+    attachmentErrorNoActiveTicket: "Open a ticket before attaching media.",
+    attachmentErrorPermissionDenied: "Camera access is off for Elite Mobile — enable it in Settings to attach media.",
+    attachmentErrorGeneric: "Couldn't attach that media. Try again.",
+    attachmentErrorOpenSettingsButton: "Open Settings",
+    mediaPreviewCloseButton: "Close",
   },
 
   ticketsList: {
@@ -215,13 +223,18 @@ export const en: Translations = {
   notes: {
     headerLabel: "Notes & photos",
     ticketLabel: (ticketName) => `Ticket: ${ticketName}`,
-    photoLabel: "photo",
-    videoLabel: "video",
     extraWorkLabel: "Flag as EXTRA work",
     extraWorkHint: "Sends to supervisor for work-order review",
     notesPlaceholder: "Add a note…",
     savingButton: "Saving…",
     saveQueuedButton: "Save (queued)",
+    addMediaTitle: "Add media",
+    takePhotoOption: "Take Photo",
+    recordVideoOption: "Record Video",
+    attachmentErrorPermissionDenied: "Camera access is off for Elite Mobile — enable it in Settings to attach media.",
+    attachmentErrorGeneric: "Couldn't attach that media. Try again.",
+    attachmentErrorOpenSettingsButton: "Open Settings",
+    mediaPreviewCloseButton: "Close",
   },
 
   syncQueue: {

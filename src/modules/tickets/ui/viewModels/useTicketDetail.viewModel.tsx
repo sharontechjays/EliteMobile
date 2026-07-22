@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
+import { Linking } from "react-native";
+import * as Crypto from "expo-crypto";
 import { useDependencies } from "@app/react/useDependencies";
 import { useTimer } from "@app/react/timer/useTimer";
 import { useNotifications } from "@app/react/notifications/useNotifications";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { GetTicketDetailUseCase } from "../../core/usecases/GetTicketDetail.usecase";
+import { GetTicketAttachmentsUseCase } from "../../core/usecases/GetTicketAttachments.usecase";
+import { CaptureTicketAttachmentUseCase } from "../../core/usecases/CaptureTicketAttachment.usecase";
 import { JobTicket } from "../../core/entities/JobTicket.entity";
+import { TicketAttachment, TicketAttachmentKind } from "../../core/entities/TicketAttachment.entity";
 
 const MEAL_MINIMUM_MINUTES = 30;
 const MEAL_MINIMUM_SECONDS = MEAL_MINIMUM_MINUTES * 60;
@@ -29,7 +34,7 @@ const formatTimer = (totalSeconds: number): string => {
 };
 
 export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: UseTicketDetailViewModelArgs) => {
-  const { ticketsReader } = useDependencies();
+  const { ticketsReader, mediaCapture, ticketAttachmentsStore } = useDependencies();
   const timer = useTimer();
   const { push } = useNotifications();
   const { strings } = useLanguage();
@@ -47,6 +52,10 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   // the same tick can still read 0 accumulated seconds, since the timer engine's accumulated
   // time is derived from real wall-clock deltas — see timerReducer's elapsedSecondsSince.)
   const [jobHasBeenStopped, setJobHasBeenStopped] = useState(false);
+  const [attachments, setAttachments] = useState<TicketAttachment[]>([]);
+  const [previewAttachment, setPreviewAttachment] = useState<TicketAttachment | null>(null);
+  const [attachmentErrorMessage, setAttachmentErrorMessage] = useState<string | null>(null);
+  const [attachmentErrorIsPermission, setAttachmentErrorIsPermission] = useState(false);
 
   const jobTimerId = `job:${ticketId}`;
   const mealTimerId = `meal:${ticketId}`;
@@ -60,6 +69,16 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    let cancelled = false;
+    new GetTicketAttachmentsUseCase(ticketAttachmentsStore).execute(ticketId).then((result) => {
+      if (!cancelled && result.success) setAttachments(result.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ticketId, ticketAttachmentsStore]);
 
   useEffect(() => {
     if (!ticket?.nextTicketId) {
@@ -152,6 +171,43 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mealTimerId, jobTimerId]);
 
+  const onCaptureMedia = useCallback(
+    async (kind: TicketAttachmentKind) => {
+      const result = await new CaptureTicketAttachmentUseCase(
+        mediaCapture,
+        ticketAttachmentsStore,
+        () => Crypto.randomUUID(),
+        () => Date.now(),
+      ).execute({ ticketId, kind, isTicketActive: jobRunning });
+
+      if (result.success) {
+        setAttachments((current) => [...current, result.data]);
+        return;
+      }
+      if (result.error.type === "CANCELLED") return;
+
+      const messageByErrorType: Record<Exclude<typeof result.error.type, "CANCELLED">, string> = {
+        NO_ACTIVE_TICKET: t.attachmentErrorNoActiveTicket,
+        PERMISSION_DENIED: t.attachmentErrorPermissionDenied,
+        CAPTURE_FAILED: t.attachmentErrorGeneric,
+        SAVE_FAILED: t.attachmentErrorGeneric,
+      };
+      setAttachmentErrorIsPermission(result.error.type === "PERMISSION_DENIED");
+      setAttachmentErrorMessage(messageByErrorType[result.error.type]);
+    },
+    [ticketId, jobRunning, mediaCapture, ticketAttachmentsStore, t],
+  );
+
+  const onCapturePhoto = useCallback(() => onCaptureMedia("photo"), [onCaptureMedia]);
+  const onCaptureVideo = useCallback(() => onCaptureMedia("video"), [onCaptureMedia]);
+  const onPreviewAttachment = useCallback((attachment: TicketAttachment) => setPreviewAttachment(attachment), []);
+  const onClosePreview = useCallback(() => setPreviewAttachment(null), []);
+  const onDismissAttachmentError = useCallback(() => setAttachmentErrorMessage(null), []);
+  const onOpenSettingsForPermission = useCallback(() => {
+    Linking.openSettings();
+    setAttachmentErrorMessage(null);
+  }, []);
+
   const mealSeconds = timer.getSeconds(mealTimerId);
 
   // The prompt is only eligible once the job has actually been stopped (not merely "not
@@ -196,6 +252,10 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
       mealCanEnd: mealSeconds >= MEAL_MINIMUM_SECONDS,
       mealSuggestVisible: mealPhase === "suggest" && jobSeconds >= MEAL_SUGGEST_AFTER_HOURS * SECONDS_PER_HOUR,
       travelPrompt,
+      attachments,
+      previewAttachment,
+      attachmentErrorMessage,
+      attachmentErrorIsPermission,
     },
     handlers: {
       onGoNotes: () => onGoNotes(ticket?.name ?? ""),
@@ -206,6 +266,12 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
       onContinueJob,
       onStartTravelToNext,
       onDismissTravelPrompt,
+      onCapturePhoto,
+      onCaptureVideo,
+      onPreviewAttachment,
+      onClosePreview,
+      onDismissAttachmentError,
+      onOpenSettingsForPermission,
     },
   };
 };

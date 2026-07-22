@@ -57,6 +57,7 @@ export const colors = {
 
   // Dark ink-toned overlays (shadows/scrims), same RGB as `ink`.
   inkOverlay18: `rgba(${INK_RGB},0.18)`,
+  inkOverlay35: `rgba(${INK_RGB},0.35)`,
   inkOverlay55: `rgba(${INK_RGB},0.55)`,
 
   // Amber drop-shadows behind primary buttons — two components tuned the same hue to
