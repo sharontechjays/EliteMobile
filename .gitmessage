@@ -1,0 +1,16 @@
+# <type>(<scope>): <short summary, imperative mood, no trailing period>
+# |<----  Using a maximum of 72 characters  ---->|
+
+# Explain why this change was made (optional, wrap at 72 chars):
+
+
+# --- Conventional Commits cheat sheet ---
+# Types:  feat | fix | refactor | chore | docs | test | style | perf
+# Scope:  the module or area touched, e.g. timesheet, sync-queue, profile
+#
+# Example:
+#   feat(profile): add language toggle to settings row
+#
+#   Crew leaders asked to switch languages without opening the app's
+#   system settings; this exposes the existing LanguageProvider toggle
+#   directly on the Profile screen.

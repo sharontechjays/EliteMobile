@@ -1,0 +1,10 @@
+node_modules
+ios
+android
+.expo
+dist
+docs
+
+# Protected files — never reformat, see CONTRIBUTING.md
+app/(tabs)/_layout.tsx
+src/ui/components/atoms/GlassSurface.tsx

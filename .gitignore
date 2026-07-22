@@ -1,8 +1,7 @@
-/.DS_Store
+**/.DS_Store
 /.expo
 /.maestro
 /.superpowers
 /.claude
 /.vscode
-/__mocks__
 node_modules
