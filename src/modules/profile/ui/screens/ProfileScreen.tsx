@@ -34,10 +34,16 @@ export function ProfileScreen({ onGoHome }: ProfileScreenProps) {
   return (
     <ScreenBackground>
       <View style={styles.container}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <BackButton onPress={onGoHome} />
-            <Text style={[typography.sectionLabel, { fontSize: 11, letterSpacing: 0.1, color: colors.faint }]}>{t.settingsSectionLabel}</Text>
+            <Text style={[typography.sectionLabel, { fontSize: 11, letterSpacing: 0.1, color: colors.faint }]}>
+              {t.settingsSectionLabel}
+            </Text>
           </View>
 
           <Text style={[typography.largeDate, { color: colors.ink }]}>{profile.crewLeaderName}</Text>
@@ -51,7 +57,9 @@ export function ProfileScreen({ onGoHome }: ProfileScreenProps) {
             ))}
           </GlassSurface>
 
-          <Text style={[typography.sectionLabel, { fontSize: 10.5, letterSpacing: 0.12, color: colors.faint }]}>{t.notificationsSectionLabel}</Text>
+          <Text style={[typography.sectionLabel, { fontSize: 10.5, letterSpacing: 0.12, color: colors.faint }]}>
+            {t.notificationsSectionLabel}
+          </Text>
 
           {profile.notifications.length === 0 ? (
             <Text style={[typography.body, { color: colors.faint }]}>{t.noNotifications}</Text>
