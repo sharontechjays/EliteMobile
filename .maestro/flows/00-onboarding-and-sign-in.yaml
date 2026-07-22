@@ -1,0 +1,29 @@
+appId: com.eliteteams.mobile
+---
+# Full cold-start onboarding: Splash -> Device Registration (demo-approve) -> Sign In -> Home.
+# This is the baseline flow every other flow assumes has already run at least once, since device
+# approval persists (real MMKV-backed storage) and Splash skips straight to Sign In afterward.
+- launchApp:
+    clearState: true
+- assertVisible: "Elite Mobile"
+- tapOn: "Continue"
+- assertVisible: "Device setup"
+- extendedWaitUntil:
+    visible: "Register this device"
+    timeout: 10000
+- tapOn: "Register this device"
+- assertVisible: "Waiting for account manager approval"
+- tapOn: "Demo: account manager approves"
+- assertVisible: "Device approved — ready to sign in"
+- tapOn: "Continue to sign in"
+- assertVisible: "Employee code"
+- tapOn: "1"
+- tapOn: "2"
+- tapOn: "3"
+- tapOn: "4"
+- tapOn: "5"
+- tapOn: "✓"
+- assertVisible:
+    text: "Tue|Mon|Wed|Thu|Fri|Sat|Sun"
+    optional: true
+- takeScreenshot: "01-home-after-sign-in"

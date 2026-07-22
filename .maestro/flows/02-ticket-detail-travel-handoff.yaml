@@ -1,0 +1,32 @@
+appId: com.eliteteams.mobile
+---
+# Phase 2's flagged-as-untested integration point: stopping a job with a queued next ticket at a
+# different site should prompt "Start Travel", landing on the new Travel screen, and confirming
+# arrival there should hand back off to the next job's Ticket Detail. Uses a deep link straight
+# into Ticket Detail (bypassing onboarding/navigation) since chesterfield-remodel is the mock
+# ticket with nextTicketId set to cornerstone-mall (a different site).
+- launchApp:
+    clearState: false
+- openLink: "elitemobile://ticket-detail?ticketId=chesterfield-remodel"
+- assertVisible: "Chesterfield Remodel"
+- takeScreenshot: "03-ticket-detail-loaded"
+
+- tapOn: "▶ Start Job"
+- assertVisible: "■ Stop Job"
+- tapOn: "■ Stop Job"
+
+- assertVisible: "Start Travel"
+- takeScreenshot: "04-travel-prompt-shown"
+- tapOn: "Start Travel"
+
+- assertVisible: "Travel time"
+- tapOn: "▶ Start Travel"
+- assertVisible: "■ Stop Travel"
+- tapOn: "■ End Travel — Arrived"
+
+- assertVisible: ".*Travel done.*"
+- takeScreenshot: "05-travel-done"
+- tapOn: "▶ Start Job"
+
+- assertVisible: "Cornerstone Mall"
+- takeScreenshot: "06-handed-off-to-next-job"

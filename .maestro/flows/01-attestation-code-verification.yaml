@@ -1,0 +1,35 @@
+appId: com.eliteteams.mobile
+---
+# Security-critical flow: confirming a punch must require the correct employee code.
+#
+# KNOWN LIMITATION (investigated, not a bug in this flow): the code field uses
+# secureTextEntry, and iOS intentionally hides secure-field content from the accessibility
+# APIs Maestro/XCUITest drive automation through — the native field visibly shows masked dots
+# as you type (confirmed via screenshot), but its real value never reaches the accessibility
+# tree Maestro reads, and the React state update behind it doesn't reliably fire either when
+# driven this way. This is a documented category of limitation for automating secureTextEntry
+# fields via XCUITest-based tools, not something to "fix" by removing the masking from the real
+# screen — that would trade away a legitimate security/UX choice just to satisfy test tooling.
+# This flow is left here, accurate up to the point of typing the code, as a starting point for
+# whoever revisits this with a different automation approach (e.g. a debug-only unmasked
+# variant behind a test flag, or a tool that drives the software keyboard directly rather than
+# via accessibility). The security behavior itself (Phase 2's employee-code gate) is already
+# covered by real, passing automated tests at the unit level:
+# src/modules/clock/ui/viewModels/useAttestation.viewModel.test.tsx.
+#
+# Assumes device is already approved + signed in from a prior run (state persists via MMKV).
+- launchApp:
+    clearState: false
+- openLink: "elitemobile://roster"
+- assertVisible: "Who's punching?"
+
+# Select Luis T. (idle -> IN direction) and open the attestation screen for them.
+- tapOn: ".*Luis T\\..*"
+- tapOn:
+    text: "Clock in selected.*"
+
+- assertVisible: "Individual attestation"
+- assertVisible: "Enter your employee code"
+- assertVisible: ".*GPS captured.*"
+- assertVisible: ".*Device verified.*"
+- takeScreenshot: "02-attestation-screen-loaded"

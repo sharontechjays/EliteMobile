@@ -1,0 +1,31 @@
+appId: com.eliteteams.mobile
+---
+# Timesheet's crew acknowledgement/dispute workflow (Phase 3) — the whole point of the screen.
+# Mock crew: Roy Brown (ack path), Brent M. (dispute path). Submitting early must be refused.
+- launchApp:
+    clearState: false
+- openLink: "elitemobile://timesheet"
+- assertVisible: "Daily timesheet"
+- assertVisible: "Roy Brown"
+- assertVisible: "0 of 2 done"
+
+# Submitting while pending must NOT navigate away — assert we're still on this screen after.
+- tapOn: "Submit"
+- assertVisible: "Daily timesheet"
+
+# Acknowledge Roy Brown (tap the Switch by its testID) -> advances to Brent M.
+- tapOn:
+    id: "ack-toggle"
+- assertVisible: "Brent M."
+- assertVisible: "1 of 2 done"
+- takeScreenshot: "07-timesheet-after-ack"
+
+# Dispute Brent M. with a reason -> advances to allDone.
+- tapOn: "e.g. Missing travel time after lunch…"
+- inputText: "Missing travel time after lunch"
+- hideKeyboard
+- tapOn: "Submit reason & continue"
+
+- assertVisible: ".*All crew members have responded.*"
+- takeScreenshot: "08-timesheet-all-done"
+- tapOn: "Submit"

@@ -1,0 +1,25 @@
+appId: com.eliteteams.mobile
+---
+# Roster's "add worker from directory" flow (Phase 3) — previously a dead "+ Add worker" button
+# with no handler at all. Maria Gonzalez is unassigned (addable); Kevin Tran is busy (must be
+# rejected silently, no row should appear for him).
+- launchApp:
+    clearState: false
+- openLink: "elitemobile://roster"
+- assertVisible: "Who's punching?"
+
+- tapOn: "+ Add worker"
+- tapOn: "Search by name…"
+- inputText: "mar"
+- hideKeyboard
+- assertVisible: "Maria Gonzalez"
+- tapOn: "Add"
+- assertVisible: ".*Pending approval.*"
+- takeScreenshot: "09-worker-added-pending"
+
+- tapOn: "+ Add worker"
+- tapOn: "Search by name…"
+- inputText: "kevin"
+- hideKeyboard
+- assertVisible: "On North Ridge HOA crew — cannot add"
+- assertNotVisible: "Add"
