@@ -1,12 +1,15 @@
 import React from "react";
+import { Linking } from "react-native";
 import { renderHook, act } from "@testing-library/react-native";
 import { DependenciesProvider } from "@app/react/DependenciesProvider";
 import { LanguageProvider } from "@app/react/language/LanguageProvider";
 import { TimerProvider } from "@app/react/timer/TimerProvider";
 import { NotificationsProvider } from "@app/react/notifications/NotificationsProvider";
 import { Dependencies } from "@app/dependencies/Dependencies.type";
-import { ok } from "@/types/Result";
+import { ok, fail } from "@/types/Result";
+import { en } from "@app/react/language/translations/en";
 import { JobTicket } from "../../core/entities/JobTicket.entity";
+import { MediaCapture } from "../../core/ports/MediaCapture.port";
 import { useTicketDetailViewModel } from "./useTicketDetail.viewModel";
 
 const TICKET: JobTicket = {
@@ -58,9 +61,36 @@ class FakeKeyValueStore {
   }
 }
 
+function fakeMediaCapture() {
+  return {
+    captureMedia: async () =>
+      ok({
+        kind: "photo" as const,
+        uri: "file://captured.jpg",
+        width: 1080,
+        height: 1920,
+        thumbnailUri: "file://captured.jpg",
+      }),
+  };
+}
+
+function fakeTicketAttachmentsStore() {
+  const byTicketId = new Map<string, unknown[]>();
+  return {
+    add: async (attachment: { ticketId: string }) => {
+      const existing = byTicketId.get(attachment.ticketId) ?? [];
+      byTicketId.set(attachment.ticketId, [...existing, attachment]);
+      return ok(undefined);
+    },
+    list: async (ticketId: string) => ok(byTicketId.get(ticketId) ?? []),
+  };
+}
+
 function buildTestDeps(): Dependencies {
   return {
     keyValueStore: new FakeKeyValueStore(),
+    mediaCapture: fakeMediaCapture(),
+    ticketAttachmentsStore: fakeTicketAttachmentsStore(),
     ticketsReader: { read: async () => ok([TICKET]), readOne: async () => ok(TICKET) },
   } as unknown as Dependencies;
 }
@@ -69,6 +99,8 @@ function buildTravelTestDeps(): Dependencies {
   const tickets = [JOB_A, JOB_B];
   return {
     keyValueStore: new FakeKeyValueStore(),
+    mediaCapture: fakeMediaCapture(),
+    ticketAttachmentsStore: fakeTicketAttachmentsStore(),
     ticketsReader: {
       read: async () => ok(tickets),
       readOne: async (id: string) => {
@@ -270,6 +302,8 @@ function buildSameSiteTestDeps(): Dependencies {
   const tickets = [SAME_SITE_JOB, SAME_SITE_NEXT];
   return {
     keyValueStore: new FakeKeyValueStore(),
+    mediaCapture: fakeMediaCapture(),
+    ticketAttachmentsStore: fakeTicketAttachmentsStore(),
     ticketsReader: {
       read: async () => ok(tickets),
       readOne: async (id: string) => {
@@ -367,5 +401,128 @@ describe("useTicketDetailViewModel — travel prompt", () => {
     act(() => result.current.handlers.onToggleJob()); // start again
     act(() => result.current.handlers.onToggleJob()); // stop again
     expect(result.current.state.travelPrompt).not.toBeNull();
+  });
+});
+
+function wrapperWithMediaCapture(captureMedia: MediaCapture["captureMedia"]) {
+  const deps = { ...buildTestDeps(), mediaCapture: { captureMedia } };
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <DependenciesProvider dependencies={deps}>
+        <LanguageProvider>
+          <TimerProvider>
+            <NotificationsProvider>{children}</NotificationsProvider>
+          </TimerProvider>
+        </LanguageProvider>
+      </DependenciesProvider>
+    );
+  };
+}
+
+describe("useTicketDetailViewModel — ticket attachments", () => {
+  it("is prevented with the standard message when the job isn't running yet", async () => {
+    const captureMedia = jest.fn(async () =>
+      ok({ kind: "photo" as const, uri: "file://x.jpg", width: 1080, height: 1920, thumbnailUri: "file://x.jpg" }),
+    );
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper: wrapperWithMediaCapture(captureMedia) },
+    );
+    await act(async () => {});
+
+    await act(async () => result.current.handlers.onCapturePhoto());
+
+    expect(captureMedia).not.toHaveBeenCalled();
+    expect(result.current.state.attachmentErrorMessage).toBe(en.ticketDetail.attachmentErrorNoActiveTicket);
+    expect(result.current.state.attachments).toHaveLength(0);
+  });
+
+  it("captures and adds a photo attachment once the job is running", async () => {
+    const captureMedia = jest.fn(async () =>
+      ok({
+        kind: "photo" as const,
+        uri: "file://captured.jpg",
+        width: 1080,
+        height: 1920,
+        thumbnailUri: "file://captured.jpg",
+      }),
+    );
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper: wrapperWithMediaCapture(captureMedia) },
+    );
+    await act(async () => {});
+
+    act(() => result.current.handlers.onToggleJob());
+    await act(async () => result.current.handlers.onCapturePhoto());
+
+    expect(captureMedia).toHaveBeenCalledWith("photo");
+    expect(result.current.state.attachmentErrorMessage).toBeNull();
+    expect(result.current.state.attachments).toHaveLength(1);
+    expect(result.current.state.attachments[0]).toMatchObject({ kind: "photo", uri: "file://captured.jpg" });
+  });
+
+  it("shows a distinct, actionable message when camera permission is denied", async () => {
+    const openSettings = jest.spyOn(Linking, "openSettings").mockResolvedValue();
+    const captureMedia = jest.fn(async () => fail({ type: "PERMISSION_DENIED" as const }));
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper: wrapperWithMediaCapture(captureMedia) },
+    );
+    await act(async () => {});
+
+    act(() => result.current.handlers.onToggleJob());
+    await act(async () => result.current.handlers.onCaptureVideo());
+
+    expect(result.current.state.attachmentErrorMessage).toBe(en.ticketDetail.attachmentErrorPermissionDenied);
+    expect(result.current.state.attachmentErrorIsPermission).toBe(true);
+
+    act(() => result.current.handlers.onOpenSettingsForPermission());
+    expect(openSettings).toHaveBeenCalled();
+    expect(result.current.state.attachmentErrorMessage).toBeNull();
+
+    openSettings.mockRestore();
+  });
+
+  it("shows no error when capture is simply cancelled by the user", async () => {
+    const captureMedia = jest.fn(async () => fail({ type: "CANCELLED" as const }));
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper: wrapperWithMediaCapture(captureMedia) },
+    );
+    await act(async () => {});
+
+    act(() => result.current.handlers.onToggleJob());
+    await act(async () => result.current.handlers.onCapturePhoto());
+
+    expect(result.current.state.attachmentErrorMessage).toBeNull();
+    expect(result.current.state.attachments).toHaveLength(0);
+  });
+
+  it("opens and closes the preview for a tapped attachment", async () => {
+    const captureMedia = jest.fn(async () =>
+      ok({
+        kind: "video" as const,
+        uri: "file://clip.mov",
+        width: 1080,
+        height: 1920,
+        thumbnailUri: "file://clip.mov",
+      }),
+    );
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper: wrapperWithMediaCapture(captureMedia) },
+    );
+    await act(async () => {});
+
+    act(() => result.current.handlers.onToggleJob());
+    await act(async () => result.current.handlers.onCaptureVideo());
+    const [attachment] = result.current.state.attachments;
+
+    act(() => result.current.handlers.onPreviewAttachment(attachment));
+    expect(result.current.state.previewAttachment).toEqual(attachment);
+
+    act(() => result.current.handlers.onClosePreview());
+    expect(result.current.state.previewAttachment).toBeNull();
   });
 });

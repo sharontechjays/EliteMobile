@@ -9,6 +9,8 @@ import { InMemoryCrewRosterAdapter } from "@modules/roster/infrastructure/adapte
 import { InMemoryPunchRecorderAdapter } from "@modules/clock/infrastructure/adapters/InMemoryPunchRecorder.adapter";
 import { InMemoryNoteSaverAdapter } from "@modules/notes/infrastructure/adapters/InMemoryNoteSaver.adapter";
 import { InMemoryTicketsAdapter } from "@modules/tickets/infrastructure/adapters/InMemoryTickets.adapter";
+import { ExpoMediaCaptureAdapter } from "@modules/tickets/infrastructure/adapters/ExpoMediaCapture.adapter";
+import { InMemoryTicketAttachmentsStoreAdapter } from "@modules/tickets/infrastructure/adapters/InMemoryTicketAttachmentsStore.adapter";
 import { InMemoryTimesheetAdapter } from "@modules/timesheet/infrastructure/adapters/InMemoryTimesheet.adapter";
 import { InMemorySyncQueueAdapter } from "@modules/sync/infrastructure/adapters/InMemorySyncQueue.adapter";
 import { InMemoryProfileAdapter } from "@modules/profile/infrastructure/adapters/InMemoryProfile.adapter";
@@ -31,6 +33,8 @@ export const buildDevDependencies = (): Dependencies => {
     punchRecorder: new InMemoryPunchRecorderAdapter(),
     noteSaver: new InMemoryNoteSaverAdapter(),
     ticketsReader: new InMemoryTicketsAdapter(),
+    mediaCapture: new ExpoMediaCaptureAdapter(),
+    ticketAttachmentsStore: new InMemoryTicketAttachmentsStoreAdapter(),
     timesheetReader: new InMemoryTimesheetAdapter(),
     syncQueueReader: new InMemorySyncQueueAdapter(),
     profileReader: new InMemoryProfileAdapter(keyValueStore),

@@ -19,7 +19,21 @@ const config: ExpoConfig = {
   android: {
     package: "com.eliteteams.mobile",
   },
-  plugins: ["expo-asset", "expo-router", "expo-secure-store", "./plugins/withFmtConstevalFix"],
+  plugins: [
+    "expo-asset",
+    "expo-router",
+    "expo-secure-store",
+    "expo-video",
+    [
+      "expo-image-picker",
+      {
+        cameraPermission: "Elite Mobile uses the camera to attach photos and videos to a ticket.",
+        microphonePermission: "Elite Mobile uses the microphone to record audio in ticket videos.",
+      },
+    ],
+    "./plugins/withFmtConstevalFix",
+    "./plugins/withoutPushEntitlement",
+  ],
 };
 
 export default config;

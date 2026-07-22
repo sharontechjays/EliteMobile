@@ -49,8 +49,16 @@
     <array>
       <string>_dev._tcp</string>
     </array>
+    <key>NSCameraUsageDescription</key>
+    <string>Elite Mobile uses the camera to attach photos and videos to a ticket.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Elite Mobile connects to your computer's local development server to load the app while developing.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Elite Mobile uses the microphone to record audio in ticket videos.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your photos</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

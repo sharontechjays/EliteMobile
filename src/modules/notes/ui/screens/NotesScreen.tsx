@@ -4,6 +4,8 @@ import { ScreenBackground } from "@/ui/components/organisms/ScreenBackground";
 import { BackButton } from "@/ui/components/atoms/BackButton";
 import { GlassSurface } from "@/ui/components/atoms/GlassSurface";
 import { PillButton } from "@/ui/components/atoms/PillButton";
+import { MediaThumbnail } from "@/ui/components/molecules/MediaThumbnail";
+import { MediaPreviewModal } from "@/ui/components/organisms/MediaPreviewModal";
 import { colors } from "@/ui/theme/colors";
 import { typography } from "@/ui/theme/typography";
 import { SCREEN_TOP_INSET_DIRECT } from "@/ui/theme/layout";
@@ -17,7 +19,16 @@ interface NotesScreenProps {
 
 export function NotesScreen({ ticketName, onGoBack }: NotesScreenProps) {
   const { state, handlers } = useNotesViewModel({ ticketName, onSaved: onGoBack });
-  const { text, photos, maxPhotos, extraWorkFlag, saving } = state;
+  const {
+    text,
+    photos,
+    maxPhotos,
+    extraWorkFlag,
+    saving,
+    previewMedia,
+    attachmentErrorMessage,
+    attachmentErrorIsPermission,
+  } = state;
   const { strings } = useLanguage();
   const t = strings.notes;
 
@@ -42,11 +53,25 @@ export function NotesScreen({ ticketName, onGoBack }: NotesScreenProps) {
           />
         </GlassSurface>
 
+        {attachmentErrorMessage && (
+          <View style={styles.attachmentErrorBanner}>
+            <Text style={styles.attachmentErrorText}>{attachmentErrorMessage}</Text>
+            {attachmentErrorIsPermission ? (
+              <Pressable onPress={handlers.onOpenSettingsForPermission}>
+                <Text style={styles.attachmentErrorAction}>{t.attachmentErrorOpenSettingsButton}</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={handlers.onDismissAttachmentError}>
+                <Text style={styles.attachmentErrorDismiss}>✕</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
         <View style={styles.photoRow}>
           {photos.map((photo) => (
-            <View key={photo.id} style={styles.photoTile}>
-              <View style={styles.photoStripes} />
-              <Text style={styles.photoLabel}>{photo.kind === "photo" ? t.photoLabel : t.videoLabel}</Text>
+            <View key={photo.id} style={styles.mediaTileWrapper}>
+              <MediaThumbnail media={photo} onPress={() => handlers.onPreviewPhoto(photo)} />
               <Pressable onPress={() => handlers.onRemovePhoto(photo.id)} style={styles.removeButton} hitSlop={6}>
                 <Text style={styles.removeButtonText}>✕</Text>
               </Pressable>
@@ -73,6 +98,12 @@ export function NotesScreen({ ticketName, onGoBack }: NotesScreenProps) {
 
         <PillButton label={saving ? t.savingButton : t.saveQueuedButton} onPress={handlers.onSave} disabled={saving} />
       </View>
+
+      <MediaPreviewModal
+        media={previewMedia}
+        closeLabel={t.mediaPreviewCloseButton}
+        onClose={handlers.onClosePreview}
+      />
     </ScreenBackground>
   );
 }
@@ -83,27 +114,6 @@ const styles = StyleSheet.create({
   noteCard: { padding: 4 },
   noteInput: { color: colors.ink, minHeight: 52, padding: 10 },
   photoRow: { flexDirection: "row", gap: 8 },
-  photoTile: {
-    width: 66,
-    height: 66,
-    borderRadius: 10,
-    backgroundColor: colors.divider,
-    borderWidth: 1,
-    borderColor: colors.progressTrack,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  photoStripes: {
-    position: "absolute",
-    top: -20,
-    left: -20,
-    width: 40,
-    height: 110,
-    backgroundColor: colors.hairline08,
-    transform: [{ rotate: "45deg" }],
-  },
-  photoLabel: { fontSize: 9, color: colors.faint },
   removeButton: {
     position: "absolute",
     top: 3,
@@ -116,6 +126,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   removeButtonText: { fontSize: 9, fontWeight: "700", color: colors.paper },
+  mediaTileWrapper: { width: 66, height: 66 },
+  attachmentErrorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.offBg,
+    borderWidth: 1,
+    borderColor: colors.offBorder,
+    borderRadius: 11,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+  },
+  attachmentErrorText: { flex: 1, fontSize: 12, color: colors.off, marginRight: 8 },
+  attachmentErrorDismiss: { fontSize: 13, color: colors.off, fontWeight: "700" },
+  attachmentErrorAction: {
+    fontSize: 11.5,
+    fontWeight: "800",
+    color: colors.off,
+    textDecorationLine: "underline",
+  },
   addPhotoTile: {
     width: 66,
     height: 66,
