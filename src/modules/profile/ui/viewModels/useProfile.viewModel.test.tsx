@@ -36,11 +36,13 @@ function buildTestDeps(store: FakeKeyValueStore): Dependencies {
 }
 
 function wrapperFor(store: FakeKeyValueStore) {
-  return ({ children }: { children: React.ReactNode }) => (
-    <DependenciesProvider dependencies={buildTestDeps(store)}>
-      <LanguageProvider>{children}</LanguageProvider>
-    </DependenciesProvider>
-  );
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <DependenciesProvider dependencies={buildTestDeps(store)}>
+        <LanguageProvider>{children}</LanguageProvider>
+      </DependenciesProvider>
+    );
+  };
 }
 
 describe("useProfileViewModel — real employee code", () => {

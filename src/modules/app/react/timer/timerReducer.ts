@@ -20,8 +20,7 @@ export const MS_PER_SECOND = 1000;
 const entryOrDefault = (state: TimersState, id: string): TimerEntryState =>
   state.entries[id] ?? { accumulatedSeconds: 0, startedAt: null };
 
-const elapsedSecondsSince = (startedAt: number, now: number): number =>
-  Math.floor((now - startedAt) / MS_PER_SECOND);
+const elapsedSecondsSince = (startedAt: number, now: number): number => Math.floor((now - startedAt) / MS_PER_SECOND);
 
 export function timerReducer(state: TimersState, action: TimerAction): TimersState {
   switch (action.type) {

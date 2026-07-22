@@ -55,7 +55,9 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
           style={styles.scroll}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 60 }]}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handlers.onRefresh} tintColor={colors.dim} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handlers.onRefresh} tintColor={colors.dim} />
+          }
         >
           <View style={styles.header}>
             <View>

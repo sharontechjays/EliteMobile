@@ -1,7 +1,5 @@
 # Phase 1 — Shared Infrastructure Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Build the four cross-cutting pieces of infrastructure the rest of the prototype-fidelity work depends on: a global `TopBar` (sync-status pill + EN/ES language toggle + notification bell), a toast/notification system with a `notifLog` feed, a generic ticking-timer engine, and EN/ES language-toggle scaffolding.
 
 **Architecture:** Follow the codebase's existing patterns — plain React Context + hooks for cross-cutting app state (mirroring `DependenciesProvider`/`useDependencies`, not a new state-management library), and the existing clean-architecture module layout (`core/entities`, `core/usecases`, `infrastructure/adapters`) only where a piece is genuinely domain data (sync status derivation). Pure logic (reducers, derivation functions) is written as framework-free functions so it can be unit-tested without rendering React.

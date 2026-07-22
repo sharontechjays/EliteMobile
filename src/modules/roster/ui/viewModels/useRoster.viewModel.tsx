@@ -68,7 +68,9 @@ export const useRosterViewModel = () => {
   }, []);
 
   const currentDirection: "IN" | "OUT" | null =
-    selectedIds.size === 0 ? null : DIRECTION_FOR_STATUS[workers.find((w) => selectedIds.has(w.id))?.statusKind ?? "idle"];
+    selectedIds.size === 0
+      ? null
+      : DIRECTION_FOR_STATUS[workers.find((w) => selectedIds.has(w.id))?.statusKind ?? "idle"];
 
   const toggleWorker = (id: string) => {
     const worker = workers.find((w) => w.id === id);
@@ -101,7 +103,12 @@ export const useRosterViewModel = () => {
     }),
     ...provisional.map((p) => ({
       id: p.id,
-      initials: p.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase(),
+      initials: p.name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase(),
       name: p.name,
       statusText: t.pendingApproval,
       statusColor: colors.idle,
@@ -148,7 +155,9 @@ export const useRosterViewModel = () => {
       eligibleSelectedCount: eligibleSelectedIds.length,
       canClockSelected: eligibleSelectedIds.length > 0,
       selectedLabel:
-        currentDirection === "OUT" ? t.selectedLabelOut(eligibleSelectedIds.length) : t.selectedLabelIn(eligibleSelectedIds.length),
+        currentDirection === "OUT"
+          ? t.selectedLabelOut(eligibleSelectedIds.length)
+          : t.selectedLabelIn(eligibleSelectedIds.length),
       bulkLabel: bulkDirection === "IN" ? t.bulkLabelIn : t.bulkLabelOut,
       requestOpen,
       requestQuery,

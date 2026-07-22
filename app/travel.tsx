@@ -10,7 +10,9 @@ export default function Travel() {
       fromTicketId={fromTicketId}
       toTicketId={toTicketId}
       onGoBack={() => router.back()}
-      onStartJobAfterTravel={(toTicketId) => router.replace({ pathname: "/ticket-detail", params: { ticketId: toTicketId } })}
+      onStartJobAfterTravel={(toTicketId) =>
+        router.replace({ pathname: "/ticket-detail", params: { ticketId: toTicketId } })
+      }
     />
   );
 }

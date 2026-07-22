@@ -1,6 +1,12 @@
 import { notificationsReducer, initialNotificationsState, MAX_NOTIF_LOG, NotifLogEntry } from "./notificationsReducer";
 
-const entry = (id: string): NotifLogEntry => ({ id, icon: "✓", title: `Title ${id}`, body: `Body ${id}`, createdAt: 0 });
+const entry = (id: string): NotifLogEntry => ({
+  id,
+  icon: "✓",
+  title: `Title ${id}`,
+  body: `Body ${id}`,
+  createdAt: 0,
+});
 
 describe("notificationsReducer", () => {
   it("pushes a new entry to the front of the log", () => {

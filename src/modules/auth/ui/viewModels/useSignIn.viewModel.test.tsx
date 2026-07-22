@@ -26,9 +26,9 @@ function buildTestDeps(validCode: string, keyValueStore: FakeKeyValueStore = new
 }
 
 function wrapperWith(keyValueStore: FakeKeyValueStore) {
-  return ({ children }: { children: React.ReactNode }) => (
-    <DependenciesProvider dependencies={buildTestDeps("12345", keyValueStore)}>{children}</DependenciesProvider>
-  );
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <DependenciesProvider dependencies={buildTestDeps("12345", keyValueStore)}>{children}</DependenciesProvider>;
+  };
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {

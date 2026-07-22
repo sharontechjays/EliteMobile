@@ -36,7 +36,10 @@ export function ScreenBackground({ children }: { children: React.ReactNode }) {
       {/* Dedicated glow behind the floating tab bar so its glass has color to refract. */}
       <LinearGradient
         colors={[colors.glowAmber, "transparent"]}
-        style={[styles.glow, { bottom: -70, left: "50%", marginLeft: -260, width: 520, height: 260, borderRadius: 260 }]}
+        style={[
+          styles.glow,
+          { bottom: -70, left: "50%", marginLeft: -260, width: 520, height: 260, borderRadius: 260 },
+        ]}
       />
       <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
 

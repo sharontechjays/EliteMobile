@@ -25,7 +25,9 @@ export function TicketsScreen({ onOpenTicket }: TicketsScreenProps) {
           style={styles.scroll}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 60 }]}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handlers.onRefresh} tintColor={colors.dim} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handlers.onRefresh} tintColor={colors.dim} />
+          }
         >
           <Text style={[typography.largeDate, { color: colors.ink }]}>{strings.ticketsList.title}</Text>
 
@@ -69,6 +71,14 @@ const styles = StyleSheet.create({
   dot: { width: 9, height: 9, borderRadius: 4.5, marginTop: 5 },
   textCol: { flex: 1, minWidth: 0 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  tag: { fontSize: 9.5, fontWeight: "700", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5, backgroundColor: colors.divider, color: colors.dim },
+  tag: {
+    fontSize: 9.5,
+    fontWeight: "700",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+    backgroundColor: colors.divider,
+    color: colors.dim,
+  },
   statusLabel: { fontSize: 11, fontWeight: "700", marginTop: 3 },
 });

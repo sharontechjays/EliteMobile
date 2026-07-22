@@ -1,7 +1,5 @@
 # Phase 3 — Missing Workflows Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Build the two missing core workflows the prototype-fidelity audit found: Timesheet's crew acknowledgement/dispute flow (currently the screen only submits the logged-in user's own hours, with no crew review step at all) and Roster's missing "add worker from directory" flow plus its incorrect footer buttons (a "Hand off/Sign out" action currently occupies a slot that should be "clock selected workers").
 
 **Architecture:** Clean-architecture module pattern, matching Phases 1-2. Reuse Phase 1's `useNotifications` for toasts on ack/dispute/incomplete-submit and on directory-add. No new state-management library.

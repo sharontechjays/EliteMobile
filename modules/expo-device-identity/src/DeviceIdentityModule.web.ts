@@ -1,8 +1,8 @@
-import { registerWebModule, NativeModule } from 'expo';
+import { registerWebModule, NativeModule } from "expo";
 
-import { DeviceIdentityModuleEvents } from './DeviceIdentity.types';
+import { DeviceIdentityModuleEvents } from "./DeviceIdentity.types";
 
-const UNSUPPORTED_MESSAGE = 'Hardware-backed device identity is not available on web.';
+const UNSUPPORTED_MESSAGE = "Hardware-backed device identity is not available on web.";
 
 class DeviceIdentityModule extends NativeModule<DeviceIdentityModuleEvents> {
   isHardwareBacked(): boolean {
@@ -25,4 +25,4 @@ class DeviceIdentityModule extends NativeModule<DeviceIdentityModuleEvents> {
   }
 }
 
-export default registerWebModule(DeviceIdentityModule, 'DeviceIdentityModule');
+export default registerWebModule(DeviceIdentityModule, "DeviceIdentityModule");

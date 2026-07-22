@@ -4,8 +4,6 @@ import { TicketsScreen } from "@modules/tickets/ui/screens/TicketsScreen";
 
 export default function Tickets() {
   return (
-    <TicketsScreen
-      onOpenTicket={(ticketId) => router.push({ pathname: "/ticket-detail", params: { ticketId } })}
-    />
+    <TicketsScreen onOpenTicket={(ticketId) => router.push({ pathname: "/ticket-detail", params: { ticketId } })} />
   );
 }

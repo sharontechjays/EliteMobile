@@ -25,7 +25,15 @@ interface PillButtonProps {
 
 // Maps to the design's full-width CTA ("CONTINUE", "CLOCK IN / OUT") and the
 // secondary glass action ("Start Travel").
-export function PillButton({ label, onPress, variant = "primary", icon, disabled, style, labelStyle }: PillButtonProps) {
+export function PillButton({
+  label,
+  onPress,
+  variant = "primary",
+  icon,
+  disabled,
+  style,
+  labelStyle,
+}: PillButtonProps) {
   const handlePress = () => {
     const impact = variant === "glass" ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium;
     Haptics.impactAsync(impact);

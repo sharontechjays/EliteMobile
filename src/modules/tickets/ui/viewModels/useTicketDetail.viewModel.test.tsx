@@ -10,23 +10,52 @@ import { JobTicket } from "../../core/entities/JobTicket.entity";
 import { useTicketDetailViewModel } from "./useTicketDetail.viewModel";
 
 const TICKET: JobTicket = {
-  id: "yard-prep", name: "Yard prep", tag: "M", sub: "Yard · est 1h", statusLabel: "Not started",
-  statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [],
+  id: "yard-prep",
+  name: "Yard prep",
+  tag: "M",
+  sub: "Yard · est 1h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
 };
 
 const JOB_A: JobTicket = {
-  id: "yard-prep", name: "Yard prep", tag: "M", sub: "Yard · est 1h", statusLabel: "Not started",
-  statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [], nextTicketId: "cornerstone-mall",
+  id: "yard-prep",
+  name: "Yard prep",
+  tag: "M",
+  sub: "Yard · est 1h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
+  nextTicketId: "cornerstone-mall",
 };
 const JOB_B: JobTicket = {
-  id: "cornerstone-mall", name: "Cornerstone Mall", tag: "E", sub: "Job site · est 3h", statusLabel: "Not started",
-  statusKind: "idle", site: "cornerstone", address: "100 Main St", estimatedHours: 3, crew: [],
+  id: "cornerstone-mall",
+  name: "Cornerstone Mall",
+  tag: "E",
+  sub: "Job site · est 3h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "cornerstone",
+  address: "100 Main St",
+  estimatedHours: 3,
+  crew: [],
 };
 
 class FakeKeyValueStore {
   private map = new Map<string, string>();
-  getString(key: string) { return this.map.get(key) ?? null; }
-  setString(key: string, value: string) { this.map.set(key, value); }
+  getString(key: string) {
+    return this.map.get(key) ?? null;
+  }
+  setString(key: string, value: string) {
+    this.map.set(key, value);
+  }
 }
 
 function buildTestDeps(): Dependencies {
@@ -76,7 +105,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe("useTicketDetailViewModel — job timer", () => {
   it("starts not running, and onToggleJob starts it", async () => {
-    const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper },
+    );
     await act(async () => {});
     expect(result.current.state.jobRunning).toBe(false);
 
@@ -85,7 +117,10 @@ describe("useTicketDetailViewModel — job timer", () => {
   });
 
   it("pausing the job stops the timer without resetting it", async () => {
-    const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+    const { result } = renderHook(
+      () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper },
+    );
     await act(async () => {});
 
     act(() => result.current.handlers.onToggleJob());
@@ -99,7 +134,10 @@ describe("useTicketDetailViewModel — job timer", () => {
     afterEach(() => jest.useRealTimers());
 
     it("actually counts the job timer up over real elapsed time, not just a running flag", async () => {
-      const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+      const { result } = renderHook(
+        () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+        { wrapper },
+      );
       await act(async () => {});
 
       act(() => result.current.handlers.onToggleJob());
@@ -112,7 +150,10 @@ describe("useTicketDetailViewModel — job timer", () => {
     });
 
     it("pausing for a meal break stops the job clock without resetting accumulated time", async () => {
-      const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+      const { result } = renderHook(
+        () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+        { wrapper },
+      );
       await act(async () => {});
 
       act(() => result.current.handlers.onToggleJob());
@@ -127,7 +168,10 @@ describe("useTicketDetailViewModel — job timer", () => {
     });
 
     it("cannot end the meal break before the 30-minute minimum has really elapsed — the guard rejects the call, not just disables a button", async () => {
-      const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+      const { result } = renderHook(
+        () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+        { wrapper },
+      );
       await act(async () => {});
 
       act(() => result.current.handlers.onToggleJob());
@@ -149,7 +193,10 @@ describe("useTicketDetailViewModel — job timer", () => {
     });
 
     it("'Continue Job' resets the meal timer and resumes the job timer", async () => {
-      const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+      const { result } = renderHook(
+        () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+        { wrapper },
+      );
       await act(async () => {});
 
       act(() => result.current.handlers.onToggleJob());
@@ -176,7 +223,10 @@ describe("useTicketDetailViewModel — job timer", () => {
     afterEach(() => jest.useRealTimers());
 
     it("jobOverEstimate stays false until elapsed job time exceeds the ticket's estimatedHours, then flips true", async () => {
-      const { result } = renderHook(() => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+      const { result } = renderHook(
+        () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
+        { wrapper },
+      );
       await act(async () => {});
       // TICKET.estimatedHours is 1, i.e. 3600 seconds.
 
@@ -191,12 +241,29 @@ describe("useTicketDetailViewModel — job timer", () => {
 });
 
 const SAME_SITE_JOB: JobTicket = {
-  id: "yard-prep", name: "Yard prep", tag: "M", sub: "Yard · est 1h", statusLabel: "Not started",
-  statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [], nextTicketId: "yard-followup",
+  id: "yard-prep",
+  name: "Yard prep",
+  tag: "M",
+  sub: "Yard · est 1h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
+  nextTicketId: "yard-followup",
 };
 const SAME_SITE_NEXT: JobTicket = {
-  id: "yard-followup", name: "Yard follow-up", tag: "M", sub: "Yard · est 1h", statusLabel: "Not started",
-  statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [],
+  id: "yard-followup",
+  name: "Yard follow-up",
+  tag: "M",
+  sub: "Yard · est 1h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
 };
 
 function buildSameSiteTestDeps(): Dependencies {
@@ -229,7 +296,7 @@ describe("useTicketDetailViewModel — travel prompt", () => {
   it("shows a travel prompt with 'start travel' copy once the job is stopped, when the next job is at a different site", async () => {
     const { result } = renderHook(
       () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
-      { wrapper: travelWrapper }
+      { wrapper: travelWrapper },
     );
     await act(async () => {});
 
@@ -243,7 +310,7 @@ describe("useTicketDetailViewModel — travel prompt", () => {
   it("shows a travel prompt with 'continue next job' copy once the job is stopped, when the next job is at the same site", async () => {
     const { result } = renderHook(
       () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
-      { wrapper: sameSiteWrapper }
+      { wrapper: sameSiteWrapper },
     );
     await act(async () => {});
 
@@ -258,7 +325,7 @@ describe("useTicketDetailViewModel — travel prompt", () => {
     const onGoTravel = jest.fn();
     const { result } = renderHook(
       () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel }),
-      { wrapper: travelWrapper }
+      { wrapper: travelWrapper },
     );
     await act(async () => {});
 
@@ -274,7 +341,7 @@ describe("useTicketDetailViewModel — travel prompt", () => {
     const onGoTravel = jest.fn();
     const { result } = renderHook(
       () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel }),
-      { wrapper: travelWrapper }
+      { wrapper: travelWrapper },
     );
     await act(async () => {});
 
@@ -288,7 +355,7 @@ describe("useTicketDetailViewModel — travel prompt", () => {
   it("stopping the job again after dismissing re-shows the prompt (dismissal resets per-stop)", async () => {
     const { result } = renderHook(
       () => useTicketDetailViewModel({ ticketId: "yard-prep", onGoNotes: jest.fn(), onGoTravel: jest.fn() }),
-      { wrapper: travelWrapper }
+      { wrapper: travelWrapper },
     );
     await act(async () => {});
 

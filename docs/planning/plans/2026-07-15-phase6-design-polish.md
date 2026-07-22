@@ -1,7 +1,5 @@
 # Phase 6 — Design Polish Pass Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Close the remaining moderate/minor prototype-fidelity gaps on Sync Queue, Profile, and Notes — the last items from the original audit not already resolved incidentally by Phases 1-5. (Tickets' mock-data-naming gap is now effectively moot: Phase 2 already gave `JobTicket` real `site`/`address`/`crew` fields with a data model that supports the prototype's actual logic; exact demo-name matching was always cosmetic and isn't worth a dedicated task.)
 
 **Architecture:** Clean-architecture module pattern, matching prior phases. The Profile employee-code fix reuses Phase 1's real `KeyValueStore` (already MMKV-backed) to persist the code entered at sign-in — the same pattern Device Registration already uses for its own persisted state.

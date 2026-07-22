@@ -1,7 +1,5 @@
 # Phase 2 — Security Fix + Missing Screens Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Close the highest-severity gaps from the prototype-fidelity audit: the Attestation screen's missing employee-code verification (currently anyone can confirm anyone's punch), and the two entirely missing screens — Ticket Detail and Travel Time — that tapping any job currently skips in favor of jumping straight to Notes.
 
 **Architecture:** Follow this codebase's clean-architecture module pattern (`core/entities`, `core/ports`, `core/usecases`, `infrastructure/adapters`, `ui/screens`, `ui/viewModels`) exactly as established in Phase 1's audit and the pre-existing modules (`tickets`, `clock`, `roster`). Use Phase 1's shared infrastructure where it fits: `useTimer` (job/travel/meal timers, survives backgrounding/kill/restart), `useNotifications` (toasts for meal-break/travel/attestation events), `TopBar` (already globally mounted, no changes needed here).

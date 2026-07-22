@@ -4,8 +4,16 @@ import { ok, fail } from "@/types/Result";
 import { JobTicket } from "../entities/JobTicket.entity";
 
 const TICKET: JobTicket = {
-  id: "yard-prep", name: "Yard prep", tag: "M", sub: "Yard · est 1h", statusLabel: "Not started",
-  statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [],
+  id: "yard-prep",
+  name: "Yard prep",
+  tag: "M",
+  sub: "Yard · est 1h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
 };
 
 describe("GetTicketDetailUseCase", () => {

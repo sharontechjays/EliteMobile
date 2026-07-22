@@ -44,15 +44,50 @@ const STATUS_KIND_COLOR: Record<DayEntry["statusKind"], { text: string; bg: stri
 const bannerForStatus = (status: CrewStatus, t: Translations["home"]): HomeBanner => {
   switch (status) {
     case "out":
-      return { icon: "●", title: t.bannerOutTitle, body: t.bannerOutBody, bg: colors.idleBg, border: colors.idleBorder, accent: colors.idle };
+      return {
+        icon: "●",
+        title: t.bannerOutTitle,
+        body: t.bannerOutBody,
+        bg: colors.idleBg,
+        border: colors.idleBorder,
+        accent: colors.idle,
+      };
     case "in":
-      return { icon: "→", title: t.bannerInTitle, body: t.bannerInBody, bg: colors.travelBg, border: colors.travelBorder, accent: colors.travel };
+      return {
+        icon: "→",
+        title: t.bannerInTitle,
+        body: t.bannerInBody,
+        bg: colors.travelBg,
+        border: colors.travelBorder,
+        accent: colors.travel,
+      };
     case "travel":
-      return { icon: "→", title: t.bannerTravelTitle, body: t.bannerTravelBody, bg: colors.travelBg, border: colors.travelBorder, accent: colors.travel };
+      return {
+        icon: "→",
+        title: t.bannerTravelTitle,
+        body: t.bannerTravelBody,
+        bg: colors.travelBg,
+        border: colors.travelBorder,
+        accent: colors.travel,
+      };
     case "job":
-      return { icon: "●", title: t.bannerJobTitle, body: t.bannerJobBody, bg: colors.jobBg, border: colors.jobBorder, accent: colors.job };
+      return {
+        icon: "●",
+        title: t.bannerJobTitle,
+        body: t.bannerJobBody,
+        bg: colors.jobBg,
+        border: colors.jobBorder,
+        accent: colors.job,
+      };
     case "lunch":
-      return { icon: "◔", title: t.bannerLunchTitle, body: t.bannerLunchBody, bg: colors.idleBg, border: colors.idleBorder, accent: colors.idle };
+      return {
+        icon: "◔",
+        title: t.bannerLunchTitle,
+        body: t.bannerLunchBody,
+        bg: colors.idleBg,
+        border: colors.idleBorder,
+        accent: colors.idle,
+      };
   }
 };
 
@@ -153,13 +188,17 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
   const travelRunning = travelTimerId ? timer.isRunning(travelTimerId) : false;
   const travelSeconds = travelTimerId ? timer.getSeconds(travelTimerId) : 0;
   const travelDone = travelTimerId ? travelSeconds > 0 && !travelRunning : false;
-  const needsTravel = summary?.nextJob.status === "pending" && !travelRunning && summary?.nextJob.requiresTravelFirst && !travelDone;
+  const needsTravel =
+    summary?.nextJob.status === "pending" && !travelRunning && summary?.nextJob.requiresTravelFirst && !travelDone;
 
   const jobButton = (() => {
-    if (travelRunning) return { label: home.travellingButton, bg: colors.travelBg, color: colors.travel, border: colors.travelBorder };
-    if (needsTravel) return { label: home.startTravelButton, bg: colors.travelBg, color: colors.travel, border: colors.travelBorder };
+    if (travelRunning)
+      return { label: home.travellingButton, bg: colors.travelBg, color: colors.travel, border: colors.travelBorder };
+    if (needsTravel)
+      return { label: home.startTravelButton, bg: colors.travelBg, color: colors.travel, border: colors.travelBorder };
     if (jobRunning) return { label: home.stopButton, bg: colors.offBg, color: colors.off, border: colors.offBorder };
-    if (jobSeconds > 0) return { label: home.pausedButton, bg: colors.jobBg, color: colors.job, border: colors.jobBorder };
+    if (jobSeconds > 0)
+      return { label: home.pausedButton, bg: colors.jobBg, color: colors.job, border: colors.jobBorder };
     return { label: home.startButton, bg: colors.jobBg, color: colors.job, border: colors.jobBorder };
   })();
   const jobButtonOpacity = summary?.crewStatus === "out" ? 0.5 : 1;
@@ -167,7 +206,11 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
   const onJobAction = () => {
     if (!summary || !jobTimerId) return;
     if (summary.crewStatus === "out") {
-      push({ icon: "!", title: strings.notifications.clockInFirstTitle, body: strings.notifications.clockInFirstJobBody });
+      push({
+        icon: "!",
+        title: strings.notifications.clockInFirstTitle,
+        body: strings.notifications.clockInFirstJobBody,
+      });
       onGoRoster();
       return;
     }
@@ -188,7 +231,11 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
   };
 
   const onNotifyQuickTap = (label: string) => {
-    push({ icon: "⚑", title: strings.notifications.officeNotifiedTitle, body: strings.notifications.officeNotifiedBody(label) });
+    push({
+      icon: "⚑",
+      title: strings.notifications.officeNotifiedTitle,
+      body: strings.notifications.officeNotifiedBody(label),
+    });
   };
 
   const onNotifySend = () => {

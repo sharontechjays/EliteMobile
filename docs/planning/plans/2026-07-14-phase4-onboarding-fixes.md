@@ -1,7 +1,5 @@
 # Phase 4 — Onboarding Fixes Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Fix two onboarding-flow gaps from the prototype-fidelity audit: every app launch currently forces a full device-registration + sign-in flow even on a previously-approved device, and the Sign In screen's keypad is a fundamentally different interaction (circular/shuffled/auto-submit) than the prototype's design (rectangular/ordered/explicit-confirm-key), plus it has an invented branch-selector row not in the design and is missing a "Device verified" confirmation.
 
 **Architecture:** Clean-architecture module pattern, matching prior phases. Device registration already persists through Phase 1's real MMKV-backed `KeyValueStore` (confirmed by reading `LocalDeviceRegistrarAdapter.ts` — no new persistence work needed here, just reading the already-persisted status on launch).

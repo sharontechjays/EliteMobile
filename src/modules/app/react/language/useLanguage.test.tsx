@@ -21,11 +21,13 @@ function buildTestDeps(keyValueStore: FakeKeyValueStore): Dependencies {
 }
 
 function wrapperWith(keyValueStore: FakeKeyValueStore) {
-  return ({ children }: { children: React.ReactNode }) => (
-    <DependenciesProvider dependencies={buildTestDeps(keyValueStore)}>
-      <LanguageProvider>{children}</LanguageProvider>
-    </DependenciesProvider>
-  );
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <DependenciesProvider dependencies={buildTestDeps(keyValueStore)}>
+        <LanguageProvider>{children}</LanguageProvider>
+      </DependenciesProvider>
+    );
+  };
 }
 
 function Probe() {

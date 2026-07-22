@@ -43,7 +43,8 @@ export const en: Translations = {
 
   deviceRegistration: {
     title: "Device setup",
-    subtitle: "First launch on this device — it must be registered and approved before anyone can sign in or punch time.",
+    subtitle:
+      "First launch on this device — it must be registered and approved before anyone can sign in or punch time.",
     deviceInfoLabel: "This device",
     nicknameLabel: "Nickname",
     modelLabel: "Model",
@@ -84,7 +85,8 @@ export const en: Translations = {
     batteryTitle: (percent) => `Battery low — ${percent}%`,
     batteryBody: "Plug in the device to keep GPS and geofencing running.",
     gpsTitle: "GPS not available",
-    gpsBody: "Location is off or has no signal. Travel and geofence arrival won't track — punches will be saved without GPS.",
+    gpsBody:
+      "Location is off or has no signal. Travel and geofence arrival won't track — punches will be saved without GPS.",
     travellingButton: "→ Travelling…",
     startTravelButton: "→ Start Travel",
     stopButton: "■ Stop",

@@ -34,7 +34,7 @@ function loadPersisted(getString: (key: string) => string | null): TimersState {
 export function TimerProvider({ children }: { children: React.ReactNode }) {
   const { keyValueStore } = useDependencies();
   const [state, dispatch] = useReducer(timerReducer, initialTimersState, () =>
-    loadPersisted(keyValueStore.getString.bind(keyValueStore))
+    loadPersisted(keyValueStore.getString.bind(keyValueStore)),
   );
   const stateRef = useRef<TimersState>(state);
   stateRef.current = state;

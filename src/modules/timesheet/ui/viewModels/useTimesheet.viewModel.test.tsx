@@ -10,8 +10,18 @@ import { useTimesheetViewModel } from "./useTimesheet.viewModel";
 
 const TIMESHEET: DailyTimesheet = {
   crew: [
-    { id: "roy-brown", name: "Roy Brown", totalHoursLabel: "8.5h", entries: [{ time: "7:02", label: "Clock-in", statusKind: "neutral" }] },
-    { id: "brent-m", name: "Brent M.", totalHoursLabel: "7.0h", entries: [{ time: "7:05", label: "Clock-in", statusKind: "neutral" }] },
+    {
+      id: "roy-brown",
+      name: "Roy Brown",
+      totalHoursLabel: "8.5h",
+      entries: [{ time: "7:02", label: "Clock-in", statusKind: "neutral" }],
+    },
+    {
+      id: "brent-m",
+      name: "Brent M.",
+      totalHoursLabel: "7.0h",
+      entries: [{ time: "7:05", label: "Clock-in", statusKind: "neutral" }],
+    },
   ],
 };
 

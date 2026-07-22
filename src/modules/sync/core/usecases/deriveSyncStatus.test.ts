@@ -1,7 +1,13 @@
 import { deriveSyncStatus } from "./deriveSyncStatus";
 import { SyncQueueItem } from "../entities/SyncQueueItem.entity";
 
-const queued = (id: string): SyncQueueItem => ({ id, time: "1:00", label: `item ${id}`, status: "queued", kind: "note" });
+const queued = (id: string): SyncQueueItem => ({
+  id,
+  time: "1:00",
+  label: `item ${id}`,
+  status: "queued",
+  kind: "note",
+});
 const rejected = (id: string): SyncQueueItem => ({
   id,
   time: "1:00",

@@ -21,7 +21,7 @@ describe("NotificationsProvider / useNotifications", () => {
     const { getByTestId } = render(
       <NotificationsProvider>
         <Probe />
-      </NotificationsProvider>
+      </NotificationsProvider>,
     );
     expect(getByTestId("count").props.children).toBe(0);
 

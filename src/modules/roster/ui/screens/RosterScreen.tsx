@@ -28,7 +28,11 @@ export function RosterScreen({ onGoHome, onStartAttestation }: RosterScreenProps
   return (
     <ScreenBackground>
       <View style={styles.container}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <BackButton onPress={onGoHome} />
             <Text style={[typography.sectionLabel, styles.headerLabel]}>{t.headerLabel}</Text>
@@ -43,7 +47,9 @@ export function RosterScreen({ onGoHome, onStartAttestation }: RosterScreenProps
                 key={row.id}
                 initials={row.initials}
                 name={row.name}
-                statusText={row.pendingApproval ? `○ ${row.statusText}` : `${row.selected ? "●" : "○"} ${row.statusText}`}
+                statusText={
+                  row.pendingApproval ? `○ ${row.statusText}` : `${row.selected ? "●" : "○"} ${row.statusText}`
+                }
                 statusColor={row.statusColor}
                 selected={row.selected}
                 disabled={!row.eligible}
@@ -93,7 +99,11 @@ export function RosterScreen({ onGoHome, onStartAttestation }: RosterScreenProps
             disabled={!canClockSelected}
             onPress={() => onStartAttestation(handlers.buildSelectedAttestationQueue())}
           />
-          <PillButton label={bulkLabel} variant="dark" onPress={() => onStartAttestation(handlers.buildBulkAttestationQueue())} />
+          <PillButton
+            label={bulkLabel}
+            variant="dark"
+            onPress={() => onStartAttestation(handlers.buildBulkAttestationQueue())}
+          />
         </View>
       </View>
     </ScreenBackground>
@@ -117,7 +127,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   requestPanel: { padding: 13, gap: 9 },
-  requestInput: { backgroundColor: colors.surface70, borderWidth: 1, borderColor: colors.hairline25, borderRadius: 10, padding: 11, fontSize: 13, color: colors.ink },
+  requestInput: {
+    backgroundColor: colors.surface70,
+    borderWidth: 1,
+    borderColor: colors.hairline25,
+    borderRadius: 10,
+    padding: 11,
+    fontSize: 13,
+    color: colors.ink,
+  },
   requestEmpty: { fontSize: 12, color: colors.faint },
   requestRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6 },
   requestBusy: { fontSize: 11, color: colors.faint, fontStyle: "italic" },

@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  InputAccessoryView,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { ScreenBackground } from "@/ui/components/organisms/ScreenBackground";
 import { BackButton } from "@/ui/components/atoms/BackButton";
@@ -95,9 +86,14 @@ export function AttestationScreen({ queue, onGoRoster, onDone }: AttestationScre
             handlers.onConfirm();
           }}
           disabled={disabled}
-          style={[styles.confirmButton, { backgroundColor: tone.bg, borderColor: tone.border, opacity: disabled ? 0.45 : 1 }]}
+          style={[
+            styles.confirmButton,
+            { backgroundColor: tone.bg, borderColor: tone.border, opacity: disabled ? 0.45 : 1 },
+          ]}
         >
-          <Text style={[typography.buttonLabel, { color: tone.color }]}>{isIn ? t.clockInButton : t.clockOutButton}</Text>
+          <Text style={[typography.buttonLabel, { color: tone.color }]}>
+            {isIn ? t.clockInButton : t.clockOutButton}
+          </Text>
         </Pressable>
 
         {Platform.OS === "ios" && (

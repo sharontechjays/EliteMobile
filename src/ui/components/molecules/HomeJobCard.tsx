@@ -61,7 +61,9 @@ export function HomeJobCard({
           <Text style={[typography.sectionLabel, { fontSize: 10.5, color: overEstimate ? colors.off : colors.faint }]}>
             {timerLabel}
           </Text>
-          <Text style={[styles.timerValue, { fontFamily: fontMono, color: overEstimate ? colors.off : colors.ink }]}>{timerValue}</Text>
+          <Text style={[styles.timerValue, { fontFamily: fontMono, color: overEstimate ? colors.off : colors.ink }]}>
+            {timerValue}
+          </Text>
         </View>
         <Pressable
           onPress={onJobAction}

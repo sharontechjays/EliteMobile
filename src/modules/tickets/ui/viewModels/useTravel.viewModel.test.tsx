@@ -9,13 +9,39 @@ import { ok } from "@/types/Result";
 import { JobTicket } from "../../core/entities/JobTicket.entity";
 import { useTravelViewModel } from "./useTravel.viewModel";
 
-const FROM: JobTicket = { id: "yard-prep", name: "Yard prep", tag: "M", sub: "", statusLabel: "", statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [] };
-const TO: JobTicket = { id: "cornerstone-mall", name: "Cornerstone Mall", tag: "E", sub: "", statusLabel: "", statusKind: "idle", site: "cornerstone", address: "100 Main St", estimatedHours: 3, crew: [] };
+const FROM: JobTicket = {
+  id: "yard-prep",
+  name: "Yard prep",
+  tag: "M",
+  sub: "",
+  statusLabel: "",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
+};
+const TO: JobTicket = {
+  id: "cornerstone-mall",
+  name: "Cornerstone Mall",
+  tag: "E",
+  sub: "",
+  statusLabel: "",
+  statusKind: "idle",
+  site: "cornerstone",
+  address: "100 Main St",
+  estimatedHours: 3,
+  crew: [],
+};
 
 class FakeKeyValueStore {
   private map = new Map<string, string>();
-  getString(key: string) { return this.map.get(key) ?? null; }
-  setString(key: string, value: string) { this.map.set(key, value); }
+  getString(key: string) {
+    return this.map.get(key) ?? null;
+  }
+  setString(key: string, value: string) {
+    this.map.set(key, value);
+  }
 }
 
 function buildTestDeps(): Dependencies {
@@ -43,8 +69,13 @@ function wrapper({ children }: { children: React.ReactNode }) {
 describe("useTravelViewModel", () => {
   it("loads both tickets and starts not travelling", async () => {
     const { result } = renderHook(
-      () => useTravelViewModel({ fromTicketId: "yard-prep", toTicketId: "cornerstone-mall", onStartJobAfterTravel: jest.fn() }),
-      { wrapper }
+      () =>
+        useTravelViewModel({
+          fromTicketId: "yard-prep",
+          toTicketId: "cornerstone-mall",
+          onStartJobAfterTravel: jest.fn(),
+        }),
+      { wrapper },
     );
     await waitFor(() => expect(result.current.state.toTicket).not.toBeNull());
     expect(result.current.state.fromTicket?.name).toBe("Yard prep");
@@ -53,8 +84,13 @@ describe("useTravelViewModel", () => {
 
   it("onToggleTravel starts and stops the travel timer", async () => {
     const { result } = renderHook(
-      () => useTravelViewModel({ fromTicketId: "yard-prep", toTicketId: "cornerstone-mall", onStartJobAfterTravel: jest.fn() }),
-      { wrapper }
+      () =>
+        useTravelViewModel({
+          fromTicketId: "yard-prep",
+          toTicketId: "cornerstone-mall",
+          onStartJobAfterTravel: jest.fn(),
+        }),
+      { wrapper },
     );
     await waitFor(() => expect(result.current.state.toTicket).not.toBeNull());
 
@@ -67,8 +103,13 @@ describe("useTravelViewModel", () => {
 
   it("onConfirmArrived stops travel and shows the travel-done state", async () => {
     const { result } = renderHook(
-      () => useTravelViewModel({ fromTicketId: "yard-prep", toTicketId: "cornerstone-mall", onStartJobAfterTravel: jest.fn() }),
-      { wrapper }
+      () =>
+        useTravelViewModel({
+          fromTicketId: "yard-prep",
+          toTicketId: "cornerstone-mall",
+          onStartJobAfterTravel: jest.fn(),
+        }),
+      { wrapper },
     );
     await waitFor(() => expect(result.current.state.toTicket).not.toBeNull());
 
@@ -83,7 +124,7 @@ describe("useTravelViewModel", () => {
     const onStartJobAfterTravel = jest.fn();
     const { result } = renderHook(
       () => useTravelViewModel({ fromTicketId: "yard-prep", toTicketId: "cornerstone-mall", onStartJobAfterTravel }),
-      { wrapper }
+      { wrapper },
     );
     await waitFor(() => expect(result.current.state.toTicket).not.toBeNull());
 

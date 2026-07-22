@@ -68,7 +68,9 @@ export function ApiIntegrationExampleScreen({ onGoBack }: ApiIntegrationExampleS
         </GlassSurface>
 
         <Pressable onPress={() => refetch()} style={styles.refreshRow}>
-          <Text style={{ color: colors.dim, fontSize: 12 }}>{isFetching ? "Refreshing…" : "Pull to refresh (tap)"}</Text>
+          <Text style={{ color: colors.dim, fontSize: 12 }}>
+            {isFetching ? "Refreshing…" : "Pull to refresh (tap)"}
+          </Text>
         </Pressable>
 
         {isLoading && <Text style={{ color: colors.faint }}>Loading…</Text>}

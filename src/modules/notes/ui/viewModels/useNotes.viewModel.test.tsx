@@ -33,12 +33,16 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe("useNotesViewModel — photo/video tiles", () => {
   it("starts with the two seeded tiles, one photo and one video", () => {
-    const { result } = renderHook(() => useNotesViewModel({ ticketName: "Yard prep", onSaved: jest.fn() }), { wrapper });
+    const { result } = renderHook(() => useNotesViewModel({ ticketName: "Yard prep", onSaved: jest.fn() }), {
+      wrapper,
+    });
     expect(result.current.state.photos.map((p) => p.kind)).toEqual(["photo", "video"]);
   });
 
   it("onRemovePhoto removes exactly the tile with the matching id", () => {
-    const { result } = renderHook(() => useNotesViewModel({ ticketName: "Yard prep", onSaved: jest.fn() }), { wrapper });
+    const { result } = renderHook(() => useNotesViewModel({ ticketName: "Yard prep", onSaved: jest.fn() }), {
+      wrapper,
+    });
     const idToRemove = result.current.state.photos[0].id;
 
     act(() => result.current.handlers.onRemovePhoto(idToRemove));
@@ -48,7 +52,9 @@ describe("useNotesViewModel — photo/video tiles", () => {
   });
 
   it("onAddPhoto still respects the max-photos cap", () => {
-    const { result } = renderHook(() => useNotesViewModel({ ticketName: "Yard prep", onSaved: jest.fn() }), { wrapper });
+    const { result } = renderHook(() => useNotesViewModel({ ticketName: "Yard prep", onSaved: jest.fn() }), {
+      wrapper,
+    });
     const before = result.current.state.photos.length;
     const max = result.current.state.maxPhotos;
 

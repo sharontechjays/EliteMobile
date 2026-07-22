@@ -14,9 +14,9 @@ function buildTestDeps(registration: DeviceRegistration | null): Dependencies {
 }
 
 function wrapperFor(registration: DeviceRegistration | null) {
-  return ({ children }: { children: React.ReactNode }) => (
-    <DependenciesProvider dependencies={buildTestDeps(registration)}>{children}</DependenciesProvider>
-  );
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <DependenciesProvider dependencies={buildTestDeps(registration)}>{children}</DependenciesProvider>;
+  };
 }
 
 describe("useSplashViewModel — device approval check", () => {
@@ -26,13 +26,23 @@ describe("useSplashViewModel — device approval check", () => {
   });
 
   it("alreadyApproved is false when the device is still pending", async () => {
-    const registration: DeviceRegistration = { deviceName: "d", status: "pending", publicKey: "k", hardwareBacked: true };
+    const registration: DeviceRegistration = {
+      deviceName: "d",
+      status: "pending",
+      publicKey: "k",
+      hardwareBacked: true,
+    };
     const { result } = renderHook(() => useSplashViewModel(), { wrapper: wrapperFor(registration) });
     await waitFor(() => expect(result.current.state.alreadyApproved).toBe(false));
   });
 
   it("alreadyApproved is true when the device was previously approved", async () => {
-    const registration: DeviceRegistration = { deviceName: "d", status: "approved", publicKey: "k", hardwareBacked: true };
+    const registration: DeviceRegistration = {
+      deviceName: "d",
+      status: "approved",
+      publicKey: "k",
+      hardwareBacked: true,
+    };
     const { result } = renderHook(() => useSplashViewModel(), { wrapper: wrapperFor(registration) });
     await waitFor(() => expect(result.current.state.alreadyApproved).toBe(true));
   });

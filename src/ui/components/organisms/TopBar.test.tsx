@@ -35,7 +35,7 @@ function renderTopBar(queueItems: SyncQueueItem[], props: React.ComponentProps<t
           <TopBar {...props} />
         </NotificationsProvider>
       </LanguageProvider>
-    </DependenciesProvider>
+    </DependenciesProvider>,
   );
 }
 

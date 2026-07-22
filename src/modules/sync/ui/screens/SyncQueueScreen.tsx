@@ -23,7 +23,11 @@ export function SyncQueueScreen({ onGoBack }: SyncQueueScreenProps) {
   return (
     <ScreenBackground>
       <View style={styles.container}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <BackButton onPress={onGoBack} />
             <Text style={[typography.sectionLabel, { color: colors.faint }]}>{t.headerLabel}</Text>

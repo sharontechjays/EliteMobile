@@ -114,7 +114,8 @@ export const es: Translations = {
     bannerInTitle: "Cuadrilla con la entrada marcada",
     bannerInBody: "Inicia el tiempo de viaje al salir del patio",
     bannerTravelTitle: "Cuadrilla en tiempo de viaje",
-    bannerTravelBody: "La llegada termina el viaje y marca la entrada de la cuadrilla a la orden de trabajo — sin espacios",
+    bannerTravelBody:
+      "La llegada termina el viaje y marca la entrada de la cuadrilla a la orden de trabajo — sin espacios",
     bannerJobTitle: "Cuadrilla en el trabajo",
     bannerJobBody: "El tiempo de trabajo está corriendo — deténlo cuando la cuadrilla salga del sitio",
     bannerLunchTitle: "Cuadrilla en el almuerzo",
@@ -153,7 +154,8 @@ export const es: Translations = {
     deviceLine: "Dispositivo de cuadrilla #CL-0482 · registrado a esta cuadrilla",
     codeSectionLabel: "Ingresa tu código de empleado",
     codeMismatch: (name) => `El código no coincide con ${name} — intenta de nuevo`,
-    codeHelper: (name) => `Solo ${name} conoce este código — comprueba que la persona correcta esté confirmando esta marcación.`,
+    codeHelper: (name) =>
+      `Solo ${name} conoce este código — comprueba que la persona correcta esté confirmando esta marcación.`,
     clockInButton: "✓ Marcar entrada",
     clockOutButton: "■ Marcar salida",
     doneKey: "Listo",
@@ -267,7 +269,8 @@ export const es: Translations = {
 
   notifications: {
     clockInFirstTitle: "Marca tu entrada primero",
-    clockInFirstJobBody: "Cada trabajador debe marcar su propia entrada antes de iniciar el viaje o el trabajo (ley de CA).",
+    clockInFirstJobBody:
+      "Cada trabajador debe marcar su propia entrada antes de iniciar el viaje o el trabajo (ley de CA).",
     clockInFirstTravelBody: "Cada trabajador debe marcar su propia entrada antes de iniciar el viaje (ley de CA)",
     officeNotifiedTitle: "Oficina avisada",
     officeNotifiedBody: (message) => `"${message}" enviado a la oficina con tu ubicación y cuadrilla.`,

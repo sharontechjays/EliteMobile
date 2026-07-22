@@ -11,8 +11,22 @@ import { DirectoryWorker } from "../../core/entities/DirectoryWorker.entity";
 import { useRosterViewModel } from "./useRoster.viewModel";
 
 const WORKERS: RosterWorker[] = [
-  { id: "roy-brown" as WorkerId, name: "Roy Brown", initials: "RB", statusText: "Clocked in", statusKind: "job", employeeCode: "4821" },
-  { id: "luis-t" as WorkerId, name: "Luis T.", initials: "LT", statusText: "Not clocked in", statusKind: "idle", employeeCode: "1029" },
+  {
+    id: "roy-brown" as WorkerId,
+    name: "Roy Brown",
+    initials: "RB",
+    statusText: "Clocked in",
+    statusKind: "job",
+    employeeCode: "4821",
+  },
+  {
+    id: "luis-t" as WorkerId,
+    name: "Luis T.",
+    initials: "LT",
+    statusText: "Not clocked in",
+    statusKind: "idle",
+    employeeCode: "1029",
+  },
 ];
 const DIRECTORY: DirectoryWorker[] = [
   { id: "maria-g", name: "Maria Gonzalez", assignedTo: null },

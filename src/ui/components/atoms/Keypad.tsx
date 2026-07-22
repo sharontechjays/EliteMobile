@@ -60,7 +60,9 @@ export function Keypad({ onKeyPress, disabled }: KeypadProps) {
               style={[styles.key, isConfirm && { borderWidth: 1.5, borderColor: colors.jobBorder }]}
             >
               <View style={styles.keyContent}>
-                <Text style={[styles.keyLabel, { fontFamily: fontMono }, isConfirm && { color: colors.job, fontSize: 27 }]}>
+                <Text
+                  style={[styles.keyLabel, { fontFamily: fontMono }, isConfirm && { color: colors.job, fontSize: 27 }]}
+                >
                   {key}
                 </Text>
               </View>

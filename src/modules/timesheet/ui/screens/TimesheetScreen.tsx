@@ -28,7 +28,9 @@ export function TimesheetScreen({ onSubmitted }: TimesheetScreenProps) {
           style={styles.scroll}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 60 }]}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handlers.onRefresh} tintColor={colors.dim} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handlers.onRefresh} tintColor={colors.dim} />
+          }
         >
           <Text style={[typography.largeDate, { color: colors.ink }]}>{t.title}</Text>
 
@@ -84,7 +86,11 @@ export function TimesheetScreen({ onSubmitted }: TimesheetScreenProps) {
             </View>
           )}
 
-          <PillButton label={submitting ? t.submittingButton : t.submitButton} onPress={handlers.onSubmit} disabled={submitting} />
+          <PillButton
+            label={submitting ? t.submittingButton : t.submitButton}
+            onPress={handlers.onSubmit}
+            disabled={submitting}
+          />
         </ScrollView>
       </View>
     </ScreenBackground>
@@ -95,7 +101,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: SCREEN_TOP_INSET },
   scroll: { flex: 1 },
   scrollContent: { gap: 13, paddingHorizontal: 18, paddingBottom: 16 },
-  workerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 12, paddingHorizontal: 14 },
+  workerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
   progressLabel: { fontSize: 11, fontWeight: "700", color: colors.faint },
   entriesCard: { paddingHorizontal: 14 },
   entryRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 9 },
@@ -120,8 +132,27 @@ const styles = StyleSheet.create({
     minHeight: 64,
     textAlignVertical: "top",
   },
-  disputeButton: { backgroundColor: colors.offBg, borderWidth: 1.5, borderColor: colors.offBorder, borderRadius: 11, paddingVertical: 12, alignItems: "center" },
-  disputeButtonText: { fontSize: 12.5, fontWeight: "800", letterSpacing: 0.5, color: colors.off, textTransform: "uppercase" },
-  doneBanner: { backgroundColor: colors.approvedCardBg, borderWidth: 1, borderColor: colors.approvedCardBorder, borderRadius: 16, padding: 12 },
+  disputeButton: {
+    backgroundColor: colors.offBg,
+    borderWidth: 1.5,
+    borderColor: colors.offBorder,
+    borderRadius: 11,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  disputeButtonText: {
+    fontSize: 12.5,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    color: colors.off,
+    textTransform: "uppercase",
+  },
+  doneBanner: {
+    backgroundColor: colors.approvedCardBg,
+    borderWidth: 1,
+    borderColor: colors.approvedCardBorder,
+    borderRadius: 16,
+    padding: 12,
+  },
   doneBannerText: { fontSize: 11.5, color: colors.job, lineHeight: 16 },
 });

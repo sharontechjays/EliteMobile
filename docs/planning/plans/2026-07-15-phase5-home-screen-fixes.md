@@ -1,7 +1,5 @@
 # Phase 5 — Home Screen Fixes Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Close the Home screen's remaining prototype-fidelity gaps: the job-timer card runs its own disconnected mock simulation instead of the real timer engine and real ticket data Phase 2 built, there's no over-estimate highlighting, the crew-status model is missing 2 of 5 states, the travel chip is wired to a prop that's never passed, and a "Shop time" day-entry row plus several small design-token fixes are missing.
 
 **Architecture:** Rather than keep Home's job card as a separate, disconnected simulation, this phase makes it consume the SAME real infrastructure Phase 2 built for Ticket Detail: Phase 1's `useTimer()` (same `` `job:${ticketId}` ``/`` `travel:${fromId}:${toId}` `` timer ids Ticket Detail and Travel already use) and Phase 2's `GetTicketDetailUseCase`. Tapping "Start/Pause/Stop" on Home's job card now toggles the literal same timer Ticket Detail shows — no more separate mock state to keep in sync.

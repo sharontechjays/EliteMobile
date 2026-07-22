@@ -60,7 +60,7 @@ describe("TimerProvider / useTimer persistence", () => {
           <Capture />
           <Probe id="job" />
         </TimerProvider>
-      </DependenciesProvider>
+      </DependenciesProvider>,
     );
     act(() => {
       hookApi!.start("job");
@@ -85,7 +85,7 @@ describe("TimerProvider / useTimer persistence", () => {
         <TimerProvider>
           <Capture />
         </TimerProvider>
-      </DependenciesProvider>
+      </DependenciesProvider>,
     );
 
     act(() => {
@@ -98,10 +98,7 @@ describe("TimerProvider / useTimer persistence", () => {
 
   it("rehydrates timer state already in the KeyValueStore when the provider mounts", () => {
     const store = new FakeKeyValueStore();
-    store.setString(
-      "timers.v1",
-      JSON.stringify({ entries: { yard: { accumulatedSeconds: 120, startedAt: null } } })
-    );
+    store.setString("timers.v1", JSON.stringify({ entries: { yard: { accumulatedSeconds: 120, startedAt: null } } }));
 
     let hookApi: ReturnType<typeof useTimer> | null = null;
     function Capture() {
@@ -113,7 +110,7 @@ describe("TimerProvider / useTimer persistence", () => {
         <TimerProvider>
           <Capture />
         </TimerProvider>
-      </DependenciesProvider>
+      </DependenciesProvider>,
     );
 
     expect(hookApi!.getSeconds("yard")).toBe(120);
@@ -132,7 +129,7 @@ describe("TimerProvider / useTimer persistence", () => {
         <TimerProvider>
           <Capture />
         </TimerProvider>
-      </DependenciesProvider>
+      </DependenciesProvider>,
     );
 
     expect(hookApi!.isRunning("travel")).toBe(false);
@@ -155,10 +152,7 @@ describe("TimerProvider / useTimer persistence (real wall clock)", () => {
   it("rehydrates a RUNNING persisted timer and reflects real elapsed wall-clock time", () => {
     const store = new FakeKeyValueStore();
     const startedAt = Date.now() - 10000; // started 10 real seconds ago
-    store.setString(
-      "timers.v1",
-      JSON.stringify({ entries: { job: { accumulatedSeconds: 50, startedAt } } })
-    );
+    store.setString("timers.v1", JSON.stringify({ entries: { job: { accumulatedSeconds: 50, startedAt } } }));
 
     let hookApi: ReturnType<typeof useTimer> | null = null;
     function Capture() {
@@ -170,7 +164,7 @@ describe("TimerProvider / useTimer persistence (real wall clock)", () => {
         <TimerProvider>
           <Capture />
         </TimerProvider>
-      </DependenciesProvider>
+      </DependenciesProvider>,
     );
 
     // 50 accumulated + ~10 elapsed since restart == ~60, with a small tolerance for

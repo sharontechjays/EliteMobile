@@ -8,7 +8,9 @@ export default function Home() {
       onOpenNextJob={(ticketId) => router.push({ pathname: "/ticket-detail", params: { ticketId } })}
       onOpenProfile={() => router.push("/profile")}
       onGoRoster={() => router.navigate("/roster")}
-      onGoTravel={(fromTicketId, toTicketId) => router.push({ pathname: "/travel", params: { fromTicketId, toTicketId } })}
+      onGoTravel={(fromTicketId, toTicketId) =>
+        router.push({ pathname: "/travel", params: { fromTicketId, toTicketId } })
+      }
     />
   );
 }

@@ -52,7 +52,13 @@ export function TravelScreen({ fromTicketId, toTicketId, onGoBack, onStartJobAft
         ) : (
           <Pressable
             onPress={handlers.onToggleTravel}
-            style={[styles.toggleButton, { backgroundColor: travelRunning ? colors.offBg : colors.travelBg, borderColor: travelRunning ? colors.offBorder : colors.travelBorder }]}
+            style={[
+              styles.toggleButton,
+              {
+                backgroundColor: travelRunning ? colors.offBg : colors.travelBg,
+                borderColor: travelRunning ? colors.offBorder : colors.travelBorder,
+              },
+            ]}
           >
             <Text style={[styles.toggleButtonText, { color: travelRunning ? colors.off : colors.travel }]}>
               {travelRunning ? t.stopTravelButton : t.startTravelButton}
@@ -87,18 +93,43 @@ const styles = StyleSheet.create({
   title: { fontSize: 26, fontWeight: "800", color: colors.travel },
   card: { padding: 15, gap: 11 },
   doneLabel: { fontSize: 12, fontWeight: "800", color: colors.job },
-  loggedRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.hairline15 },
+  loggedRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.hairline15,
+  },
   loggedLabel: { fontSize: 12, color: colors.faint },
   loggedValue: { fontSize: 12, fontWeight: "600", color: colors.ink },
   startJobButton: { backgroundColor: colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: "center" },
-  startJobButtonText: { fontSize: 14, fontWeight: "800", color: colors.accentInk, textTransform: "uppercase", letterSpacing: 0.5 },
+  startJobButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: colors.accentInk,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   toggleButton: { borderRadius: 18, borderWidth: 1.5, paddingVertical: 18, alignItems: "center" },
   toggleButtonText: { fontSize: 16, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
-  arrivedButton: { borderRadius: 11, paddingVertical: 13, alignItems: "center", backgroundColor: colors.travelBg, borderWidth: 1.5, borderColor: colors.travelBorder },
+  arrivedButton: {
+    borderRadius: 11,
+    paddingVertical: 13,
+    alignItems: "center",
+    backgroundColor: colors.travelBg,
+    borderWidth: 1.5,
+    borderColor: colors.travelBorder,
+  },
   arrivedButtonText: { fontSize: 12.5, fontWeight: "800", color: colors.travel, textTransform: "uppercase" },
   runningBlock: { alignItems: "center", gap: 2 },
   timerValue: { fontSize: 30, fontWeight: "600", color: colors.ink },
   fromTo: { fontSize: 12.5, color: colors.dim, textAlign: "center" },
-  footerBanner: { backgroundColor: colors.travelCardBg, borderWidth: 1, borderColor: colors.travelCardBorder, borderRadius: 16, padding: 12 },
+  footerBanner: {
+    backgroundColor: colors.travelCardBg,
+    borderWidth: 1,
+    borderColor: colors.travelCardBorder,
+    borderRadius: 16,
+    padding: 12,
+  },
   footerBannerText: { fontSize: 11.5, color: colors.travel, lineHeight: 16 },
 });

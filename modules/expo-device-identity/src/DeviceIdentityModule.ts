@@ -1,6 +1,6 @@
-import { NativeModule, requireNativeModule } from 'expo';
+import { NativeModule, requireNativeModule } from "expo";
 
-import { DeviceIdentityModuleEvents } from './DeviceIdentity.types';
+import { DeviceIdentityModuleEvents } from "./DeviceIdentity.types";
 
 declare class DeviceIdentityModule extends NativeModule<DeviceIdentityModuleEvents> {
   isHardwareBacked(): boolean;
@@ -12,4 +12,4 @@ declare class DeviceIdentityModule extends NativeModule<DeviceIdentityModuleEven
 }
 
 // This call loads the native module object from the JSI.
-export default requireNativeModule<DeviceIdentityModule>('DeviceIdentity');
+export default requireNativeModule<DeviceIdentityModule>("DeviceIdentity");

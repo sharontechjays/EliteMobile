@@ -19,7 +19,10 @@ export function WorkerRow({ initials, name, statusText, statusColor, selected, d
       onPress={disabled ? undefined : onPress}
       style={[
         styles.row,
-        { backgroundColor: selected ? colors.selectedRowBg : colors.surface, borderColor: selected ? colors.accent : colors.border },
+        {
+          backgroundColor: selected ? colors.selectedRowBg : colors.surface,
+          borderColor: selected ? colors.accent : colors.border,
+        },
         disabled && styles.disabled,
       ]}
     >
@@ -35,7 +38,10 @@ export function WorkerRow({ initials, name, statusText, statusColor, selected, d
       <View
         style={[
           styles.ring,
-          { borderColor: selected ? colors.accent : colors.border, backgroundColor: selected ? colors.accent : "transparent" },
+          {
+            borderColor: selected ? colors.accent : colors.border,
+            backgroundColor: selected ? colors.accent : "transparent",
+          },
         ]}
       />
     </Pressable>

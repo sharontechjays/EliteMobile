@@ -24,10 +24,7 @@ interface StatusBannerProps {
 export function StatusBanner({ icon, title, body, tone, onNotifyPress }: StatusBannerProps) {
   return (
     <View
-      style={[
-        styles.container,
-        { backgroundColor: tone.bg, borderColor: tone.border, borderLeftColor: tone.accent },
-      ]}
+      style={[styles.container, { backgroundColor: tone.bg, borderColor: tone.border, borderLeftColor: tone.accent }]}
     >
       <View style={styles.iconBox}>
         <Text style={[styles.iconText, { color: tone.accent }]}>{icon}</Text>

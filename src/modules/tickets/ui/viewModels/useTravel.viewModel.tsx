@@ -61,7 +61,11 @@ export const useTravelViewModel = ({ fromTicketId, toTicketId, onStartJobAfterTr
   const onConfirmArrived = useCallback(() => {
     timer.pause(travelTimerId);
     setTravelDone(true);
-    push({ icon: "✓", title: strings.travel.travelDoneNotifTitle, body: strings.travel.travelDoneNotifBody(formatTimer(timer.getSeconds(travelTimerId))) });
+    push({
+      icon: "✓",
+      title: strings.travel.travelDoneNotifTitle,
+      body: strings.travel.travelDoneNotifBody(formatTimer(timer.getSeconds(travelTimerId))),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [travelTimerId, push, strings]);
 
@@ -74,7 +78,10 @@ export const useTravelViewModel = ({ fromTicketId, toTicketId, onStartJobAfterTr
   const translatedToTicket = toTicket
     ? {
         ...toTicket,
-        sub: toTicket.site === "yard" ? mock.ticketYardEstimate(String(toTicket.estimatedHours)) : mock.ticketJobSiteEstimate(String(toTicket.estimatedHours)),
+        sub:
+          toTicket.site === "yard"
+            ? mock.ticketYardEstimate(String(toTicket.estimatedHours))
+            : mock.ticketJobSiteEstimate(String(toTicket.estimatedHours)),
       }
     : null;
 

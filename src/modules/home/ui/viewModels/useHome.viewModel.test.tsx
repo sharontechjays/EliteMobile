@@ -29,14 +29,26 @@ const SUMMARY: HomeSummary = {
 };
 
 const TICKET: JobTicket = {
-  id: "yard-prep", name: "Yard prep", tag: "M", sub: "Yard · est 1h", statusLabel: "Not started",
-  statusKind: "idle", site: "yard", address: "Company Yard", estimatedHours: 1, crew: [],
+  id: "yard-prep",
+  name: "Yard prep",
+  tag: "M",
+  sub: "Yard · est 1h",
+  statusLabel: "Not started",
+  statusKind: "idle",
+  site: "yard",
+  address: "Company Yard",
+  estimatedHours: 1,
+  crew: [],
 };
 
 class FakeKeyValueStore {
   private map = new Map<string, string>();
-  getString(key: string) { return this.map.get(key) ?? null; }
-  setString(key: string, value: string) { this.map.set(key, value); }
+  getString(key: string) {
+    return this.map.get(key) ?? null;
+  }
+  setString(key: string, value: string) {
+    this.map.set(key, value);
+  }
 }
 
 function buildTestDeps(): Dependencies {
@@ -61,7 +73,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe("useHomeViewModel — real timer integration", () => {
   it("job button starts the same timer id Ticket Detail uses", async () => {
-    const { result } = renderHook(() => useHomeViewModel({ onOpenNextJob: jest.fn(), onGoRoster: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+    const { result } = renderHook(
+      () => useHomeViewModel({ onOpenNextJob: jest.fn(), onGoRoster: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper },
+    );
     await waitFor(() => expect(result.current.state.summary).not.toBeNull());
 
     act(() => result.current.handlers.onJobAction());
@@ -69,7 +84,10 @@ describe("useHomeViewModel — real timer integration", () => {
   });
 
   it("jobOverEstimate becomes true once elapsed time passes the ticket's estimated hours", async () => {
-    const { result } = renderHook(() => useHomeViewModel({ onOpenNextJob: jest.fn(), onGoRoster: jest.fn(), onGoTravel: jest.fn() }), { wrapper });
+    const { result } = renderHook(
+      () => useHomeViewModel({ onOpenNextJob: jest.fn(), onGoRoster: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper },
+    );
     await waitFor(() => expect(result.current.state.summary).not.toBeNull());
 
     expect(result.current.state.jobOverEstimate).toBe(false);

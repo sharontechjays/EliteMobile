@@ -137,7 +137,11 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
     if (timer.getSeconds(mealTimerId) < MEAL_MINIMUM_SECONDS) return;
     timer.pause(mealTimerId);
     setMealPhase("done");
-    push({ icon: "✓", title: t.mealBreakLoggedTitle, body: t.mealBreakLoggedBody(formatTimer(timer.getSeconds(mealTimerId))) });
+    push({
+      icon: "✓",
+      title: t.mealBreakLoggedTitle,
+      body: t.mealBreakLoggedBody(formatTimer(timer.getSeconds(mealTimerId))),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mealTimerId, push, t]);
 
@@ -165,7 +169,6 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
 
   const onStartTravelToNext = useCallback(() => {
     if (ticket?.nextTicketId) onGoTravel(ticket.id, ticket.nextTicketId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket?.id, ticket?.nextTicketId, onGoTravel]);
 
   // ticket.sub is mock English content (see InMemoryTickets.adapter.ts's own comment) — the
@@ -173,7 +176,10 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   const translatedTicket = ticket
     ? {
         ...ticket,
-        sub: ticket.site === "yard" ? mock.ticketYardEstimate(String(ticket.estimatedHours)) : mock.ticketJobSiteEstimate(String(ticket.estimatedHours)),
+        sub:
+          ticket.site === "yard"
+            ? mock.ticketYardEstimate(String(ticket.estimatedHours))
+            : mock.ticketJobSiteEstimate(String(ticket.estimatedHours)),
       }
     : null;
 
