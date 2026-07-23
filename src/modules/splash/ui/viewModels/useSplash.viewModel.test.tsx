@@ -1,13 +1,25 @@
 import React from "react";
 import { renderHook, waitFor } from "@testing-library/react-native";
 import { DependenciesProvider } from "@app/react/DependenciesProvider";
+import { LanguageProvider } from "@app/react/language/LanguageProvider";
 import { Dependencies } from "@app/dependencies/Dependencies.type";
 import { ok } from "@/types/Result";
 import { DeviceRegistration } from "@modules/deviceRegistration/core/entities/DeviceRegistration.entity";
 import { useSplashViewModel } from "./useSplash.viewModel";
 
+class FakeKeyValueStore {
+  private map = new Map<string, string>();
+  getString(key: string) {
+    return this.map.get(key) ?? null;
+  }
+  setString(key: string, value: string) {
+    this.map.set(key, value);
+  }
+}
+
 function buildTestDeps(registration: DeviceRegistration | null): Dependencies {
   return {
+    keyValueStore: new FakeKeyValueStore(),
     appReadinessReader: { read: async () => ok({ lastSyncAt: null }) },
     deviceRegistrar: { read: async () => ok(registration), register: async (r: DeviceRegistration) => ok(r) },
   } as unknown as Dependencies;
@@ -15,7 +27,11 @@ function buildTestDeps(registration: DeviceRegistration | null): Dependencies {
 
 function wrapperFor(registration: DeviceRegistration | null) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return <DependenciesProvider dependencies={buildTestDeps(registration)}>{children}</DependenciesProvider>;
+    return (
+      <DependenciesProvider dependencies={buildTestDeps(registration)}>
+        <LanguageProvider>{children}</LanguageProvider>
+      </DependenciesProvider>
+    );
   };
 }
 

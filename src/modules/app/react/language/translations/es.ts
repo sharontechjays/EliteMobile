@@ -53,6 +53,8 @@ export const es: Translations = {
     tagline: "Registro de tiempo y trabajos en campo",
     loading: "Cargando el trabajo de hoy…",
     lastSync: (label) => `Última sincronización: ${label} · Idioma definido por el perfil del empleado`,
+    checkingSync: "Comprobando última sincronización…",
+    notYetSynced: "Aún no sincronizado",
     continueButton: "Continuar",
   },
 

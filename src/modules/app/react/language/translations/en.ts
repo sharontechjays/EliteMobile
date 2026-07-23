@@ -38,6 +38,8 @@ export const en: Translations = {
     tagline: "Field time & job capture",
     loading: "Loading today's work…",
     lastSync: (label) => `Last sync: ${label} · Language set by employee profile`,
+    checkingSync: "Checking last sync…",
+    notYetSynced: "Not yet synced",
     continueButton: "Continue",
   },
 

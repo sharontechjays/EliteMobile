@@ -43,6 +43,8 @@ export interface Translations {
     tagline: string;
     loading: string;
     lastSync: (label: string) => string;
+    checkingSync: string;
+    notYetSynced: string;
     continueButton: string;
   };
 
