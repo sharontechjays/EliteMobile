@@ -9,7 +9,7 @@ import { GlassView, isGlassEffectAPIAvailable } from "expo-glass-effect";
 const canUseGlass = isGlassEffectAPIAvailable();
 
 const SHADOW_STYLE = {
-  shadowColor: "rgba(30,30,15,1)",
+  shadowColor: "rgba(43,51,47,1)", // Pine — matches colors.glassShadow (see its own comment)
   shadowOpacity: 0.16,
   shadowRadius: 16,
   shadowOffset: { width: 0, height: 9 },
