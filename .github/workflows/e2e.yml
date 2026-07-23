@@ -39,10 +39,22 @@ jobs:
 
       - name: Boot iOS Simulator
         run: |
-          xcrun simctl bootstatus "iPhone 15" -b
+          # Don't hardcode a device name: which iPhone simulators are preinstalled is tied to
+          # the Xcode version above, and that lineup shifts across runner-image updates (this
+          # is exactly what broke "iPhone 15" — Xcode 16.2's runner image doesn't ship it).
+          # Resolve to whatever iPhone simulator is actually available instead.
+          DEVICE_NAME=$(xcrun simctl list devices available | grep -E "^ +iPhone" | head -1 | sed -E 's/^ +(.+) \([-A-F0-9]+\).*/\1/')
+          if [ -z "$DEVICE_NAME" ]; then
+            echo "No available iPhone simulator found on this runner:"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator: $DEVICE_NAME"
+          echo "SIMULATOR_NAME=$DEVICE_NAME" >> "$GITHUB_ENV"
+          xcrun simctl bootstatus "$DEVICE_NAME" -b
 
       - name: Build and install app on simulator
-        run: npx expo run:ios --no-install --device "iPhone 15"
+        run: npx expo run:ios --no-install --device "$SIMULATOR_NAME"
 
       - name: Run Maestro flows
         run: maestro test .maestro/flows/
