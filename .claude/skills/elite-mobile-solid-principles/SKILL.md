@@ -12,7 +12,7 @@ explicit, with real examples from the codebase, so new code keeps the same near-
 of drifting toward direct imports between layers.
 
 **Dependency injection already exists in this project** — see the DIP section below. There is no
-separate framework to add; the existing `useDependencies()` + React Context mechanism *is* the DI
+separate framework to add; the existing `useDependencies()` + React Context mechanism _is_ the DI
 container. "Add DI" in practice means: keep using it for every new port, and never import an adapter
 directly.
 
@@ -37,7 +37,7 @@ export class GetTicketDetailUseCase {
 ```
 
 Even a usecase with several steps (validate → capture → persist) stays SRP-compliant as long as those
-steps are all *one cohesive reason to change* — "how a ticket attachment gets captured":
+steps are all _one cohesive reason to change_ — "how a ticket attachment gets captured":
 
 ```typescript
 // CaptureTicketAttachment.usecase.ts — three steps, one responsibility
@@ -62,11 +62,13 @@ through the `MediaCapture` port, that would be two reasons to change (business r
 or business rule vs. a specific native API) — split it.
 
 ### Detection Questions
+
 - Does this usecase/adapter have more than one reason to change?
 - Would a UI-copy change and a business-rule change both touch this same file?
 - Is a ViewModel doing anything beyond calling a usecase and shaping `{ state, handlers }`?
 
 ### Red flag in this codebase
+
 A ViewModel importing an adapter directly, or calling `fetch`/a native module itself instead of going
 through a usecase + port.
 
@@ -119,12 +121,15 @@ export interface MediaCapture {
 
 // ExpoMediaCaptureAdapter.ts — real implementation, wraps expo-image-picker
 export class ExpoMediaCaptureAdapter implements MediaCapture {
-  async captureMedia(kind: TicketAttachmentKind) { /* real camera, returns Result */ }
+  async captureMedia(kind: TicketAttachmentKind) {
+    /* real camera, returns Result */
+  }
 }
 
 // CaptureTicketAttachment.usecase.test.ts — test fake, honors the exact same contract
 const mediaCapture: MediaCapture = {
-  captureMedia: async () => ok({ kind: "photo", uri: "file://captured.jpg", width: 1080, height: 1920, thumbnailUri: "file://captured.jpg" }),
+  captureMedia: async () =>
+    ok({ kind: "photo", uri: "file://captured.jpg", width: 1080, height: 1920, thumbnailUri: "file://captured.jpg" }),
 };
 ```
 
@@ -134,11 +139,14 @@ testable without a device, camera, or native module.
 ```typescript
 // BAD — would break LSP: a fake that throws instead of returning Result
 const brokenFake: MediaCapture = {
-  captureMedia: async () => { throw new Error("not implemented"); }, // callers expect Result!
+  captureMedia: async () => {
+    throw new Error("not implemented");
+  }, // callers expect Result!
 };
 ```
 
 ### Key insight
+
 This is exactly why `useDependencies()` + the `Dependencies` interface can hand a ViewModel either the
 real `dependencies.dev.ts` wiring or a hand-built fake `Dependencies` object in a test — every port
 implementation, real or fake, honors the identical `Result<T,E>` contract.
@@ -182,6 +190,7 @@ interface TicketAttachments {
 ever needs to read tickets is never forced to implement or fake a write method it will never call.
 
 ### Detection
+
 If a fake/mock implementation of a port has a method that just throws `"not implemented"` or is a
 no-op stub, the port is too fat — split it by which callers actually need which methods.
 
@@ -225,7 +234,7 @@ export const buildDevDependencies = (): Dependencies => ({
 });
 ```
 
-**This *is* the project's dependency injection** — React Context standing in for a DI container,
+**This _is_ the project's dependency injection** — React Context standing in for a DI container,
 with no additional library needed:
 
 ```typescript
@@ -269,25 +278,26 @@ ViewModel depends on a port type name (`TicketsReader`, `MediaCapture`), never a
 
 ## Applying SOLID Across Elite Mobile
 
-| Principle | How Elite Mobile applies it |
-|---|---|
-| SRP | One usecase = one domain operation; ViewModels only shape `{ state, handlers }`, never call adapters or usecases-worth of logic inline |
-| OCP | New capability = new usecase file + a wider error union; existing usecases untouched |
-| LSP | Every port has a real adapter and a test fake, both honoring the identical `Result<T,E>` contract with no throws |
-| ISP | Ports split by role (`MediaCapture` vs `TicketAttachmentsStore`, `TicketsReader` read-only) — never one fat interface |
-| DIP | `core/` depends only on port interfaces; `Dependencies.type.ts` + `dependencies.dev.ts` + `useDependencies()` is the DI container — the only place concrete adapters are named |
+| Principle | How Elite Mobile applies it                                                                                                                                                    |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SRP       | One usecase = one domain operation; ViewModels only shape `{ state, handlers }`, never call adapters or usecases-worth of logic inline                                         |
+| OCP       | New capability = new usecase file + a wider error union; existing usecases untouched                                                                                           |
+| LSP       | Every port has a real adapter and a test fake, both honoring the identical `Result<T,E>` contract with no throws                                                               |
+| ISP       | Ports split by role (`MediaCapture` vs `TicketAttachmentsStore`, `TicketsReader` read-only) — never one fat interface                                                          |
+| DIP       | `core/` depends only on port interfaces; `Dependencies.type.ts` + `dependencies.dev.ts` + `useDependencies()` is the DI container — the only place concrete adapters are named |
 
 ## Quick Reference
 
-| Principle | One-liner | Red flag in Elite Mobile |
-|---|---|---|
-| SRP | One reason to change | A ViewModel with `fetch`/native-module calls or formatting logic beyond simple derivation |
-| OCP | Add, don't modify | Editing an unrelated existing usecase just to add a new one |
-| LSP | Subtypes are substitutable | A test fake that throws instead of returning `Result` |
-| ISP | Small, focused interfaces | A port with a method a caller/fake never actually needs |
-| DIP | Depend on abstractions | `new InMemoryXAdapter()` or `new ExpoXAdapter()` anywhere outside `dependencies.dev.ts` |
+| Principle | One-liner                  | Red flag in Elite Mobile                                                                  |
+| --------- | -------------------------- | ----------------------------------------------------------------------------------------- |
+| SRP       | One reason to change       | A ViewModel with `fetch`/native-module calls or formatting logic beyond simple derivation |
+| OCP       | Add, don't modify          | Editing an unrelated existing usecase just to add a new one                               |
+| LSP       | Subtypes are substitutable | A test fake that throws instead of returning `Result`                                     |
+| ISP       | Small, focused interfaces  | A port with a method a caller/fake never actually needs                                   |
+| DIP       | Depend on abstractions     | `new InMemoryXAdapter()` or `new ExpoXAdapter()` anywhere outside `dependencies.dev.ts`   |
 
 ## Related
+
 - `elite-mobile-clean-architecture` — the module/layer shape these principles map onto, real module
   list, file naming, testing conventions.
 - `elite-mobile-offline` — the one place a second, network-backed DI pattern exists today

@@ -13,12 +13,12 @@ don't touch this layer at all yet.
 
 ## What actually exists
 
-| Piece | File | What it does |
-|---|---|---|
-| Query client | `src/modules/app/react/queryClient/queryClient.ts` | `staleTime`/`gcTime` tuned generous (5min/24h) so a screen has something to show from cache immediately; queries default to `networkMode: "offlineFirst"` |
-| Connectivity | `src/modules/app/react/queryClient/setupOnlineManager.ts` | Wires React Query's `onlineManager` to `@react-native-community/netinfo` (RN has no `navigator.onLine`) |
-| Cache persistence | `KeyValueStoreAsyncStorage.ts` + `PersistQueryClientProvider` in `app/_layout.tsx` | Persists the query cache through the existing `KeyValueStore` (MMKV) — survives an app restart |
-| Mutation pause/resume | default `networkMode: "online"` on mutations (the React Query default) | A mutation fired with no connection goes **paused**, not failed; `queryClient.resumePausedMutations()` is called in the persister's `onSuccess` so mutations paused before a cold app kill still resume once reopened online |
+| Piece                 | File                                                                               | What it does                                                                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Query client          | `src/modules/app/react/queryClient/queryClient.ts`                                 | `staleTime`/`gcTime` tuned generous (5min/24h) so a screen has something to show from cache immediately; queries default to `networkMode: "offlineFirst"`                                                                    |
+| Connectivity          | `src/modules/app/react/queryClient/setupOnlineManager.ts`                          | Wires React Query's `onlineManager` to `@react-native-community/netinfo` (RN has no `navigator.onLine`)                                                                                                                      |
+| Cache persistence     | `KeyValueStoreAsyncStorage.ts` + `PersistQueryClientProvider` in `app/_layout.tsx` | Persists the query cache through the existing `KeyValueStore` (MMKV) — survives an app restart                                                                                                                               |
+| Mutation pause/resume | default `networkMode: "online"` on mutations (the React Query default)             | A mutation fired with no connection goes **paused**, not failed; `queryClient.resumePausedMutations()` is called in the persister's `onSuccess` so mutations paused before a cold app kill still resume once reopened online |
 
 There is **no outbox, no idempotency key, no custom sync engine, no background sync trigger beyond
 what React Query itself provides.** If a feature needs stronger offline durability guarantees than
@@ -72,8 +72,8 @@ available; only reach for it when the module is actually being wired to a real n
 ## Bilingual (EN/ES) — the real mechanism
 
 Not i18next. A hand-rolled system: `src/modules/app/react/language/translations/{Translations.type.ts,
-en.ts, es.ts}` (TypeScript enforces both dictionaries share the exact same shape) + `LanguageProvider`
-+ `useLanguage()` returning `{ language, setLanguage, strings }`. Selection persists via MMKV. Every
+en.ts, es.ts}` (TypeScript enforces both dictionaries share the exact same shape), `LanguageProvider`,
+and `useLanguage()` returning `{ language, setLanguage, strings }`. Selection persists via MMKV. Every
 screen destructures `const { strings } = useLanguage(); const t = strings.<namespace>;` — never a bare
 literal string, including content sourced from mock adapters (see `elite-mobile-clean-architecture`'s
 localization section for how mock data gets translated).

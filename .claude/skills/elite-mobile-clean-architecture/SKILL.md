@@ -31,7 +31,7 @@ React Context.
    pending state).
 4. **This is not yet an offline-sync product.** There is no outbox, no idempotency keys, no BFF, no
    Acumatica/Workforce Go integration. The `sync` module's Sync Queue screen is a **read-only** view
-   over mock data today. See `elite-mobile-offline` for what real offline infrastructure *does* exist
+   over mock data today. See `elite-mobile-offline` for what real offline infrastructure _does_ exist
    (React Query caching + mutation pause/resume) and its current scope.
 
 ```
@@ -91,23 +91,23 @@ __mocks__/                            # Jest manual mocks for native modules tha
 
 > **`ios/` and `android/` ARE committed to git**, not regenerated on every build. Native config changes
 > (permissions, plugins) go through `app.config.ts` + `plugins/*.js`, then require **`npx expo prebuild
-> --platform ios`** to sync into the committed native project before `pod install` + rebuild — this
+--platform ios`** to sync into the committed native project before `pod install` + rebuild — this
 > project does not auto-run prebuild the way a fully-managed/CNG-only workflow would. Custom plugins
 > already in use: `plugins/withFmtConstevalFix.js` (Podfile patch), `plugins/withoutPushEntitlement.js`
 > (strips an unwanted autolinked entitlement — see its own comment for why).
 
 ## File Naming Conventions
 
-| Type | Extension | Example |
-|------|-----------|---------|
-| Entity | `.entity.ts` | `JobTicket.entity.ts`, `TicketAttachment.entity.ts` |
-| Port (interface) | `.port.ts` | `TicketsReader.port.ts`, `MediaCapture.port.ts` |
-| Use Case | `.usecase.ts` | `GetTicketDetail.usecase.ts`, `CaptureTicketAttachment.usecase.ts` |
-| Adapter (impl) | `.adapter.ts` | `InMemoryTickets.adapter.ts`, `ExpoMediaCapture.adapter.ts` |
-| ViewModel | `.viewModel.tsx` | `useTicketDetail.viewModel.tsx` |
-| React component / screen | `PascalCase.tsx` | `TicketDetailScreen.tsx` |
-| Unit test (colocated) | `.test.ts(x)` | `CaptureTicketAttachment.usecase.test.ts` |
-| Maestro E2E flow | `NN-description.yaml` under `.maestro/flows/` | `04-roster-add-worker.yaml` |
+| Type                     | Extension                                     | Example                                                            |
+| ------------------------ | --------------------------------------------- | ------------------------------------------------------------------ |
+| Entity                   | `.entity.ts`                                  | `JobTicket.entity.ts`, `TicketAttachment.entity.ts`                |
+| Port (interface)         | `.port.ts`                                    | `TicketsReader.port.ts`, `MediaCapture.port.ts`                    |
+| Use Case                 | `.usecase.ts`                                 | `GetTicketDetail.usecase.ts`, `CaptureTicketAttachment.usecase.ts` |
+| Adapter (impl)           | `.adapter.ts`                                 | `InMemoryTickets.adapter.ts`, `ExpoMediaCapture.adapter.ts`        |
+| ViewModel                | `.viewModel.tsx`                              | `useTicketDetail.viewModel.tsx`                                    |
+| React component / screen | `PascalCase.tsx`                              | `TicketDetailScreen.tsx`                                           |
+| Unit test (colocated)    | `.test.ts(x)`                                 | `CaptureTicketAttachment.usecase.test.ts`                          |
+| Maestro E2E flow         | `NN-description.yaml` under `.maestro/flows/` | `04-roster-add-worker.yaml`                                        |
 
 **Adapters are named by their technology/role, not with an `I` prefix on the port.** Port = role
 (`TicketsReader`); adapter = `InMemoryTicketsAdapter` (mock) or `ExpoMediaCaptureAdapter` (real native
@@ -117,6 +117,7 @@ API, everything else is `InMemory*` until a real backend exists).
 ## Layer Rules
 
 ### Core (`core/`)
+
 ```
 ✅ Entities (plain types), ports (interfaces), usecases (business logic)
 ✅ Uses Result<T,E> for errors; imports only types/, same-module core files, and injected primitives
@@ -126,6 +127,7 @@ API, everything else is `InMemory*` until a real backend exists).
 ```
 
 ### Infrastructure (`infrastructure/adapters/`)
+
 ```
 ✅ Adapters implement ports; today that means either an in-memory mock or a thin wrapper around one
    real Expo API (expo-image-picker, expo-secure-store, react-native-mmkv, etc.)
@@ -134,6 +136,7 @@ API, everything else is `InMemory*` until a real backend exists).
 ```
 
 ### UI (`ui/{screens,viewModels}/`)
+
 ```
 ✅ Screens are presentation only; ViewModels return { state, handlers } and call usecases via
    useDependencies()
@@ -162,6 +165,7 @@ type Result<T, E = Error> = Success<T> | Failure<E>;
 export const ok = <T>(data: T): Success<T> => ({ success: true, data });
 export const fail = <E>(error: E): Failure<E> => ({ success: false, error });
 ```
+
 Usecases and adapters return `Result<T,E>`, never throw. Error types are discriminated unions
 (`{ type: "NOT_FOUND" } | { type: "READ_FAILED" }`), not generic `Error`.
 
@@ -178,8 +182,8 @@ etc.), and the owning ViewModel derives the actual translated text from those fi
 - Colocated `*.test.ts(x)` next to the file it covers.
 - Usecases/adapters: plain Jest unit tests against `Result` output, both success and failure paths.
 - ViewModels: `renderHook` (`@testing-library/react-native`) wrapped in a real `DependenciesProvider`
-  + `LanguageProvider` (+ `TimerProvider`/`NotificationsProvider` where the viewModel needs them),
-  with a hand-built fake `Dependencies` object — not a shared DI profile.
+  - `LanguageProvider` (+ `TimerProvider`/`NotificationsProvider` where the viewModel needs them),
+    with a hand-built fake `Dependencies` object — not a shared DI profile.
 - No enforced coverage threshold — this is a fidelity prototype, not a coverage-gated production repo.
   Run `npm test` (all), `npx jest <path>` (one file/module).
 - E2E: Maestro, YAML flows in `.maestro/flows/`, run via `npm run e2e` or `maestro test <file>`. See
@@ -201,11 +205,11 @@ Extract named constants for any bare literal with meaning (`MEAL_MINIMUM_SECONDS
 
 ## Linting & Formatting
 
-| Tool | Config file | Role |
-|---|---|---|
-| ESLint | `eslint.config.js` | Correctness — `eslint-config-expo/flat` (RN/Expo + React Hooks rules) as the base, with `eslint-config-prettier` layered on top to turn off any stylistic rule that would fight Prettier |
-| Prettier | `.prettierrc.json` + `.prettierignore` | All formatting — 120 col width, double quotes, trailing commas, semicolons |
-| EditorConfig | `.editorconfig` | Cross-editor whitespace defaults (2-space indent, LF, trim trailing whitespace) |
+| Tool         | Config file                            | Role                                                                                                                                                                                     |
+| ------------ | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ESLint       | `eslint.config.js`                     | Correctness — `eslint-config-expo/flat` (RN/Expo + React Hooks rules) as the base, with `eslint-config-prettier` layered on top to turn off any stylistic rule that would fight Prettier |
+| Prettier     | `.prettierrc.json` + `.prettierignore` | All formatting — 120 col width, double quotes, trailing commas, semicolons                                                                                                               |
+| EditorConfig | `.editorconfig`                        | Cross-editor whitespace defaults (2-space indent, LF, trim trailing whitespace)                                                                                                          |
 
 **Division of responsibility:** Prettier owns formatting, ESLint owns everything else. Don't add a
 stylistic ESLint rule (quote style, indentation, etc.) — that's Prettier's job and

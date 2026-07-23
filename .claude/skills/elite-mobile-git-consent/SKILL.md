@@ -12,6 +12,7 @@ user directly asking is.
 ## What counts as consent
 
 ✅ Counts:
+
 - "commit this"
 - "commit and push"
 - "create a PR"
@@ -19,8 +20,9 @@ user directly asking is.
   commit it")
 
 ❌ Does not count:
+
 - The work being finished, tested, and verified
-- A prior turn's approval of a *different* commit/push — each commit/push needs its own fresh ask
+- A prior turn's approval of a _different_ commit/push — each commit/push needs its own fresh ask
 - Silence, or the user moving on to a different topic
 - "looks good" / "nice" / general positive feedback with no explicit commit instruction
 - Inferring consent because a similar action was approved earlier in the session
@@ -55,7 +57,7 @@ here isn't just noise, it's real shared history that then needs a revert or forc
    Scope list above.
 4. If a task naturally involves several commits (e.g. splitting unrelated changes into separate
    logical commits), one "commit and push" instruction covers that whole described batch — but a
-   *new* round of changes discovered afterward (like a follow-up fix) still needs its own ask.
+   _new_ round of changes discovered afterward (like a follow-up fix) still needs its own ask.
 
 ## Related
 
