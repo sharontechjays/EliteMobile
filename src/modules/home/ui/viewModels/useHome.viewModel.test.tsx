@@ -46,6 +46,24 @@ const SUMMARY: HomeSummary = {
   dayEntries: [],
 };
 
+const SUMMARY_WITH_DAY_ENTRY: HomeSummary = {
+  ...SUMMARY,
+  dayEntries: [
+    {
+      id: "yard",
+      name: "Yard prep",
+      statusText: "Not started",
+      statusKind: "idle",
+      timer: "00:00",
+      buttonLabel: "▶ Start",
+      buttonEnabled: true,
+      location: "Yard — Chesterfield",
+      startTime: "—",
+      endTime: "—",
+    },
+  ],
+};
+
 const TICKET: JobTicket = {
   id: "yard-prep",
   name: "Yard prep",
@@ -139,5 +157,59 @@ describe("useHomeViewModel — clock-in meal reminder banner", () => {
 
     expect(result.current.home.state.mealReminderBanner).not.toBeNull();
     expect(result.current.home.state.mealReminderBanner?.title).toBe(en.ticketDetail.mealReminderTitle);
+  });
+});
+
+describe("useHomeViewModel — day-entry timers are one-time-per-day", () => {
+  function dayEntryTestDeps(): Dependencies {
+    return {
+      keyValueStore: new FakeKeyValueStore(),
+      homeSummaryReader: { today: async () => ok(SUMMARY_WITH_DAY_ENTRY) },
+      ticketsReader: { read: async () => ok([TICKET]), readOne: async () => ok(TICKET) },
+      batteryReader: { getLevelPercent: async () => ok(100), subscribe: () => () => {} },
+      gpsAvailabilityReader: { isAvailable: async () => ok(true), subscribe: () => () => {} },
+    } as unknown as Dependencies;
+  }
+
+  function customWrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <DependenciesProvider dependencies={dayEntryTestDeps()}>
+        <LanguageProvider>
+          <TimerProvider>
+            <NotificationsProvider>
+              <MealReminderProvider>{children}</MealReminderProvider>
+            </NotificationsProvider>
+          </TimerProvider>
+        </LanguageProvider>
+      </DependenciesProvider>
+    );
+  }
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("locks the button after one start/stop cycle, and it stays disabled", async () => {
+    const { result } = renderHook(
+      () => useHomeViewModel({ onOpenNextJob: jest.fn(), onGoRoster: jest.fn(), onGoTravel: jest.fn() }),
+      { wrapper: customWrapper },
+    );
+    await waitFor(() => expect(result.current.state.summary).not.toBeNull());
+
+    const yard = () => result.current.state.dayItems.find((item) => item.id === "yard")!;
+    expect(yard().button.opacity).toBe(1);
+
+    act(() => yard().button.onPress());
+    expect(yard().button.label).toBe(en.home.stopButton);
+    expect(yard().button.opacity).toBe(1);
+
+    act(() => jest.advanceTimersByTime(2000));
+    act(() => yard().button.onPress());
+    expect(yard().statusText).toBe(en.home.dayEntryLogged);
+    expect(yard().button.opacity).toBe(0.5);
+
+    const secondsAfterLock = yard().timer;
+    act(() => yard().button.onPress());
+    expect(yard().timer).toBe(secondsAfterLock);
+    expect(yard().button.opacity).toBe(0.5);
   });
 });

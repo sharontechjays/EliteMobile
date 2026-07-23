@@ -78,6 +78,10 @@ export const SIGN_IN_ERROR_DISPLAY_MS = 350;
 // as AttestationScreen's TextInput maxLength.
 export const ATTESTATION_MIN_CODE_LENGTH = 4;
 export const ATTESTATION_MAX_CODE_LENGTH = 6;
+// Single shared TimerProvider id for the app-wide "day timer" shown in TopBar on every screen —
+// started by the first IN punch of the day (see useAttestation.viewModel.tsx) and kept running
+// regardless of any individual worker's later clock-outs.
+export const DAY_TIMER_ID = "day-shift";
 
 // --- Splash ---
 // Fake progress bar: starts partially filled (rather than 0) so the splash screen never shows a

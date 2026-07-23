@@ -29,6 +29,7 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
     batteryPercent,
     showBatteryWarning,
     showGpsWarning,
+    showOfflineWarning,
     dayItems,
     refreshing,
     jobButton,
@@ -88,6 +89,15 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
               icon="◎"
               title={t.gpsTitle}
               body={t.gpsBody}
+              tone={{ bg: colors.offBg, border: colors.offBorder, accent: colors.off }}
+            />
+          )}
+
+          {showOfflineWarning && (
+            <StatusBanner
+              icon="✕"
+              title={t.offlineTitle}
+              body={t.offlineBody}
               tone={{ bg: colors.offBg, border: colors.offBorder, accent: colors.off }}
             />
           )}

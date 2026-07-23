@@ -3,6 +3,7 @@ import { useDependencies } from "@app/react/useDependencies";
 import { useTimer } from "@app/react/timer/useTimer";
 import { useNotifications } from "@app/react/notifications/useNotifications";
 import { useMealReminders } from "@app/react/mealReminders/useMealReminders";
+import { useIsOnline } from "@app/react/queryClient/useIsOnline";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { Translations } from "@app/react/language/translations/Translations.type";
 import { colors } from "@/ui/theme/colors";
@@ -145,6 +146,7 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
   const timer = useTimer();
   const { push } = useNotifications();
   const { activeReminders } = useMealReminders();
+  const isOnline = useIsOnline();
   const { strings } = useLanguage();
   const home = strings.home;
   const mock = strings.mockData;
@@ -208,6 +210,7 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
 
   const showBatteryWarning = batteryPercent < LOW_BATTERY_WARNING_THRESHOLD;
   const showGpsWarning = !gpsAvailable;
+  const showOfflineWarning = !isOnline;
   const banner = summary ? bannerForStatus(summary.crewStatus, home) : null;
   const mealReminderBanner = mealReminderBannerFor(activeReminders, ticketDetail);
 
@@ -220,11 +223,15 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
     const dayTimerId = `day:${entry.id}`;
     const dayRunning = timer.isRunning(dayTimerId);
     const daySeconds = timer.getSeconds(dayTimerId);
+    // One-time-per-day timer: once started and then stopped, it's done for the day — locked,
+    // not resumable, until the entry resets (e.g. a future day boundary). Still running counts
+    // as "in progress," not locked, so it can always be stopped.
+    const dayLocked = daySeconds > 0 && !dayRunning;
     const tone = STATUS_KIND_COLOR[dayRunning ? "job" : "idle"];
     return {
       id: entry.id,
       name: DAY_ENTRY_NAME[entry.id]?.(mock) ?? entry.name,
-      statusText: dayRunning ? strings.travel.running : daySeconds > 0 ? home.pausedButton : mock.homeNotStarted,
+      statusText: dayRunning ? strings.travel.running : dayLocked ? home.dayEntryLogged : mock.homeNotStarted,
       statusColor: tone.text,
       timer: formatTimer(daySeconds),
       location: DAY_ENTRY_LOCATION[entry.id]?.(mock) ?? entry.location,
@@ -237,8 +244,9 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
         bg: tone.bg,
         color: tone.text,
         border: tone.border,
-        opacity: 1,
+        opacity: dayLocked ? 0.5 : 1,
         onPress: () => {
+          if (dayLocked) return;
           if (dayRunning) timer.pause(dayTimerId);
           else timer.start(dayTimerId);
           // Same instant-feedback bump onToggleJob/onJobAction use — the timer engine's context
@@ -352,6 +360,7 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
       batteryPercent,
       showBatteryWarning,
       showGpsWarning,
+      showOfflineWarning,
       dayItems,
       refreshing,
       jobButton,
