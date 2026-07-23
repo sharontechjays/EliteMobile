@@ -13,6 +13,7 @@ import { TicketAttachmentsStore } from "@modules/tickets/core/ports/TicketAttach
 import { TimesheetReader } from "@modules/timesheet/core/ports/TimesheetReader.port";
 import { SyncQueueReader } from "@modules/sync/core/ports/SyncQueueReader.port";
 import { ProfileReader } from "@modules/profile/core/ports/ProfileReader.port";
+import { ExampleNotesApi } from "@modules/apiIntegrationExample/core/ports/ExampleNotesApi.port";
 
 export interface Dependencies {
   keyValueStore: KeyValueStore;
@@ -30,4 +31,5 @@ export interface Dependencies {
   timesheetReader: TimesheetReader;
   syncQueueReader: SyncQueueReader;
   profileReader: ProfileReader;
+  exampleNotesApi: ExampleNotesApi;
 }
