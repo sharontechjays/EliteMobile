@@ -20,6 +20,9 @@ export interface HomeBanner {
 
 const SECONDS_PER_HOUR = 3600;
 const DEFAULT_BATTERY_PERCENT = 100;
+// A field crew member losing signal or dying mid-shift is the failure mode this app cares most
+// about — 35% gives enough runway to notice and charge before the device dies outright, well
+// above a bare "critical" threshold (typically ~15-20%).
 const LOW_BATTERY_WARNING_THRESHOLD = 35;
 
 // The mock adapter always seeds exactly these three day entries — this maps each entry's
@@ -151,6 +154,9 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
     setRefreshing(false);
   }, [load]);
 
+  // Both default to "no warning" while summary hasn't loaded yet (full battery assumed, GPS
+  // assumed available) — showing a false-positive warning during the brief initial load would be
+  // worse than a one-tick delay in showing a real one once data arrives.
   const showBatteryWarning = (summary?.batteryPercent ?? DEFAULT_BATTERY_PERCENT) < LOW_BATTERY_WARNING_THRESHOLD;
   const showGpsWarning = summary ? !summary.gpsAvailable : false;
   const banner = summary ? bannerForStatus(summary.crewStatus, home) : null;
@@ -185,11 +191,20 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
   const jobSeconds = jobTimerId ? timer.getSeconds(jobTimerId) : 0;
   const jobRunning = jobTimerId ? timer.isRunning(jobTimerId) : false;
   const estimatedSeconds = (summary?.nextJob.estimatedHours ?? 0) * SECONDS_PER_HOUR;
+  // Gated on estimatedSeconds > 0 so a job with no estimate set (falls back to 0) never shows as
+  // "over estimate" — there's nothing to be over.
   const jobOverEstimate = estimatedSeconds > 0 && jobSeconds > estimatedSeconds;
 
   const travelRunning = travelTimerId ? timer.isRunning(travelTimerId) : false;
   const travelSeconds = travelTimerId ? timer.getSeconds(travelTimerId) : 0;
+  // There's no explicit travel-status field — "done" is inferred purely from elapsed time plus
+  // running state: some time has accumulated (travel was actually started at some point) but it's
+  // not currently running (it was paused/stopped, not just never begun).
   const travelDone = travelTimerId ? travelSeconds > 0 && !travelRunning : false;
+  // All four conditions must hold to still need travel: the job hasn't started yet ("pending"),
+  // travel isn't already in progress, this job actually requires travel first (some don't), and
+  // travel hasn't already been completed — any one of these being false means either travel is
+  // irrelevant or already handled.
   const needsTravel =
     summary?.nextJob.status === "pending" && !travelRunning && summary?.nextJob.requiresTravelFirst && !travelDone;
 
@@ -207,6 +222,9 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
 
   const onJobAction = () => {
     if (!summary || !jobTimerId) return;
+    // Clocked out entirely: this taps enforces "clock in before starting a job" as a business
+    // rule rather than starting the job timer anyway — it redirects to Roster (where clock-in
+    // happens) instead of acting on the job at all.
     if (summary.crewStatus === "out") {
       push({
         icon: "!",
@@ -216,6 +234,8 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
       onGoRoster();
       return;
     }
+    // Silent no-op while travel is in progress — the travel chip (showTravelChip below) is the
+    // only affordance to stop travel; this button intentionally does nothing until travel ends.
     if (travelRunning) return;
     if (needsTravel && travelTimerId) {
       timer.start(travelTimerId);

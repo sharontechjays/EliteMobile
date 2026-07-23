@@ -25,6 +25,10 @@ export function TopBar({ showSyncPill = true }: TopBarProps) {
   const { language, setLanguage, strings } = useLanguage();
   const { log } = useNotifications();
   const insets = useSafeAreaInsets();
+  // Optimistically starts "synced" rather than a neutral/loading state — this bar renders on
+  // every screen, so a loading flicker on every navigation would be more visually noisy than the
+  // brief window (until the effect below resolves) where a genuinely pending queue is
+  // momentarily shown as synced.
   const [status, setStatus] = useState<SyncStatus>(SYNCED_STATUS);
 
   useEffect(() => {

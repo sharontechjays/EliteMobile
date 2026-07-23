@@ -16,6 +16,10 @@ interface WorkerRowProps {
 export function WorkerRow({ initials, name, statusText, statusColor, selected, disabled, onPress }: WorkerRowProps) {
   return (
     <Pressable
+      // Gates via onPress={undefined} rather than Pressable's own `disabled` prop (used directly
+      // by sibling components like Keypad/PillButton) — the visual dimming here comes entirely
+      // from styles.disabled below, applied unconditionally regardless of Pressable's own
+      // pressed-state handling.
       onPress={disabled ? undefined : onPress}
       style={[
         styles.row,

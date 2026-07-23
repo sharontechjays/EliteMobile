@@ -30,13 +30,20 @@ export const useProfileViewModel = () => {
       new GetProfileSummaryUseCase(profileReader).execute(),
       new GetDeviceRegistrationUseCase(deviceRegistrar).execute(),
     ]).then(([profileResult, registrationResult]) => {
+      // A failed profile read leaves `profile` at its initial null forever — there's no error
+      // state or retry surfaced to ProfileScreen. Acceptable today only because InMemoryProfile
+      // adapter's read() always succeeds; revisit if a real, fallible backend replaces it.
       if (cancelled || !profileResult.success) return;
+      // A failed/missing device registration silently falls back to the mock device name in
+      // profileResult.data rather than surfacing that real device info couldn't be loaded.
       const registration = registrationResult.success ? registrationResult.data : null;
       setProfile(registration ? { ...profileResult.data, device: registration.deviceName } : profileResult.data);
     });
     return () => {
       cancelled = true;
     };
+    // Empty deps deliberately: runs once on mount — profileReader/deviceRegistrar are DI-provided
+    // singletons stable for the app's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -46,6 +53,10 @@ export const useProfileViewModel = () => {
         language: LANGUAGE_DISPLAY_NAME[language],
         notifications: profile.notifications.map((notif) => ({
           ...notif,
+          // Falls back to the raw (untranslated, mock English) title/body if this notification's
+          // id has no entry in NOTIFICATION_TEXT — silent by design so an unmapped mock
+          // notification still renders something rather than crashing, but a real notification id
+          // showing up untranslated here is a signal NOTIFICATION_TEXT is missing an entry for it.
           ...(NOTIFICATION_TEXT[notif.id]?.(mock) ?? { title: notif.title, body: notif.body }),
         })),
       }
