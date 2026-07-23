@@ -1,8 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-
-const RETRY_COUNT = 2;
-const STALE_TIME_MS = 5 * 60 * 1000; // 5 min — data this fresh is shown without a background refetch
-const CACHE_TIME_MS = 24 * 60 * 60 * 1000; // 24h — how long a punch/roster/ticket stays available offline
+import { QUERY_CACHE_TIME_MS, QUERY_RETRY_COUNT, QUERY_STALE_TIME_MS } from "@/constants/appConstants";
 
 // Defaults tuned for a field crew that regularly loses signal (yards, rural job sites):
 //  - staleTime/gcTime are generous, so a screen already has something to show immediately from
@@ -17,12 +14,12 @@ export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        retry: RETRY_COUNT,
-        staleTime: STALE_TIME_MS,
-        gcTime: CACHE_TIME_MS,
+        retry: QUERY_RETRY_COUNT,
+        staleTime: QUERY_STALE_TIME_MS,
+        gcTime: QUERY_CACHE_TIME_MS,
       },
       mutations: {
-        retry: RETRY_COUNT,
+        retry: QUERY_RETRY_COUNT,
       },
     },
   });

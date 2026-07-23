@@ -1,22 +1,15 @@
 import { useEffect, useState } from "react";
 import { useDependencies } from "@app/react/useDependencies";
 import { useLanguage } from "@app/react/language/useLanguage";
+import { SPLASH_INITIAL_PROGRESS, SPLASH_PROGRESS_INTERVAL_MS, SPLASH_PROGRESS_STEP } from "@/constants/appConstants";
 import { GetAppReadinessUseCase } from "../../core/usecases/GetAppReadiness.usecase";
 import { GetDeviceRegistrationUseCase } from "@modules/deviceRegistration/core/usecases/GetDeviceRegistration.usecase";
-
-// Fake progress bar: starts partially filled (rather than 0) so the splash screen never shows a
-// completely empty bar on first paint, and advances in fixed steps rather than being tied to any
-// real loading signal — the actual readiness check (GetAppReadinessUseCase) resolves independently
-// and doesn't gate this animation.
-const INITIAL_PROGRESS = 0.15;
-const PROGRESS_STEP = 0.17;
-const PROGRESS_INTERVAL_MS = 220;
 
 export const useSplashViewModel = () => {
   const { appReadinessReader, deviceRegistrar } = useDependencies();
   const { strings } = useLanguage();
   const t = strings.splash;
-  const [progress, setProgress] = useState(INITIAL_PROGRESS);
+  const [progress, setProgress] = useState(SPLASH_INITIAL_PROGRESS);
   const [lastSyncLabel, setLastSyncLabel] = useState(t.checkingSync);
   const [ready, setReady] = useState(false);
   const [alreadyApproved, setAlreadyApproved] = useState(false);
@@ -42,14 +35,14 @@ export const useSplashViewModel = () => {
 
     const timer = setInterval(() => {
       setProgress((p) => {
-        const next = Math.min(1, p + PROGRESS_STEP);
+        const next = Math.min(1, p + SPLASH_PROGRESS_STEP);
         if (next >= 1) {
           clearInterval(timer);
           setReady(true);
         }
         return next;
       });
-    }, PROGRESS_INTERVAL_MS);
+    }, SPLASH_PROGRESS_INTERVAL_MS);
 
     return () => {
       cancelled = true;

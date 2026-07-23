@@ -5,6 +5,7 @@ import { useNotifications } from "@app/react/notifications/useNotifications";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { Translations } from "@app/react/language/translations/Translations.type";
 import { colors } from "@/ui/theme/colors";
+import { DEFAULT_BATTERY_PERCENT, LOW_BATTERY_WARNING_THRESHOLD, SECONDS_PER_HOUR } from "@/constants/appConstants";
 import { GetHomeSummaryUseCase } from "../../core/usecases/GetHomeSummary.usecase";
 import { GetTicketDetailUseCase } from "@modules/tickets/core/usecases/GetTicketDetail.usecase";
 import { CrewStatus, DayEntry, HomeSummary } from "../../core/entities/HomeSummary.entity";
@@ -17,13 +18,6 @@ export interface HomeBanner {
   border: string;
   accent: string;
 }
-
-const SECONDS_PER_HOUR = 3600;
-const DEFAULT_BATTERY_PERCENT = 100;
-// A field crew member losing signal or dying mid-shift is the failure mode this app cares most
-// about — 35% gives enough runway to notice and charge before the device dies outright, well
-// above a bare "critical" threshold (typically ~15-20%).
-const LOW_BATTERY_WARNING_THRESHOLD = 35;
 
 // The mock adapter always seeds exactly these three day entries — this maps each entry's
 // language-neutral id to its translated display name (the adapter's own `name` field is mock

@@ -1,3 +1,5 @@
+import { MS_PER_SECOND } from "@/constants/appConstants";
+
 export interface TimerEntryState {
   accumulatedSeconds: number;
   startedAt: number | null;
@@ -18,8 +20,6 @@ export type TimerAction =
   | { type: "HYDRATE"; state: TimersState };
 
 export const initialTimersState: TimersState = { entries: {} };
-
-export const MS_PER_SECOND = 1000;
 
 const entryOrDefault = (state: TimersState, id: string): TimerEntryState =>
   state.entries[id] ?? { accumulatedSeconds: 0, startedAt: null };

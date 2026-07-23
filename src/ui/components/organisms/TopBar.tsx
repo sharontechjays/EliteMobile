@@ -11,14 +11,13 @@ import { useLanguage } from "@app/react/language/useLanguage";
 import { useNotifications } from "@app/react/notifications/useNotifications";
 import { GetSyncQueueUseCase } from "@modules/sync/core/usecases/GetSyncQueue.usecase";
 import { deriveSyncStatus, SyncStatus } from "@modules/sync/core/usecases/deriveSyncStatus.usecase";
+import { TOPBAR_BELL_ICON_SIZE, TOPBAR_BELL_SIZE } from "@/constants/appConstants";
 
 interface TopBarProps {
   showSyncPill?: boolean;
 }
 
 const SYNCED_STATUS: SyncStatus = { state: "synced", pendingCount: 0, rejectedCount: 0 };
-const BELL_SIZE = 36;
-const BELL_ICON_SIZE = 17;
 
 export function TopBar({ showSyncPill = true }: TopBarProps) {
   const { syncQueueReader } = useDependencies();
@@ -68,7 +67,7 @@ export function TopBar({ showSyncPill = true }: TopBarProps) {
         <Pressable onPress={() => router.push("/profile")} accessibilityLabel={strings.topBar.notificationsA11yLabel}>
           <GlassSurface radius={999} style={styles.bell}>
             <View style={styles.bellInner}>
-              <BellIcon size={BELL_ICON_SIZE} />
+              <BellIcon size={TOPBAR_BELL_ICON_SIZE} />
               {log.length > 0 ? <View style={styles.bellDot} /> : null}
             </View>
           </GlassSurface>
@@ -103,8 +102,8 @@ const styles = StyleSheet.create({
   syncPill: { flexDirection: "row", alignItems: "center", gap: 7, paddingVertical: 7, paddingHorizontal: 14 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   right: { flexDirection: "row", alignItems: "center", gap: 10 },
-  bell: { width: BELL_SIZE, height: BELL_SIZE },
-  bellInner: { width: BELL_SIZE, height: BELL_SIZE, alignItems: "center", justifyContent: "center" },
+  bell: { width: TOPBAR_BELL_SIZE, height: TOPBAR_BELL_SIZE },
+  bellInner: { width: TOPBAR_BELL_SIZE, height: TOPBAR_BELL_SIZE, alignItems: "center", justifyContent: "center" },
   bellDot: {
     position: "absolute",
     top: 3,

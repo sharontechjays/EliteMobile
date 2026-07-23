@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { colors } from "../../theme/colors";
-
-const COLUMNS = 10;
-const ROWS = 20;
-const SPACING = 40;
+import {
+  BACKGROUND_TEXTURE_COLUMNS,
+  BACKGROUND_TEXTURE_ROWS,
+  BACKGROUND_TEXTURE_SPACING,
+} from "@/constants/appConstants";
 
 interface Dot {
   key: string;
@@ -19,14 +20,14 @@ interface Dot {
 export function BackgroundTexture() {
   const dots = useMemo<Dot[]>(() => {
     const result: Dot[] = [];
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLUMNS; col++) {
+    for (let row = 0; row < BACKGROUND_TEXTURE_ROWS; row++) {
+      for (let col = 0; col < BACKGROUND_TEXTURE_COLUMNS; col++) {
         // Deterministic pseudo-variation so the grid doesn't look mechanically uniform.
         const wobble = Math.sin(row * 1.7 + col * 2.3);
         result.push({
           key: `${row}-${col}`,
-          left: col * SPACING + (row % 2 === 0 ? 0 : SPACING / 2),
-          top: row * SPACING,
+          left: col * BACKGROUND_TEXTURE_SPACING + (row % 2 === 0 ? 0 : BACKGROUND_TEXTURE_SPACING / 2),
+          top: row * BACKGROUND_TEXTURE_SPACING,
           size: 2.5 + wobble * 1.2,
           opacity: 0.1 + Math.abs(wobble) * 0.1,
         });
