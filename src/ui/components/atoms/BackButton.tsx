@@ -8,6 +8,8 @@ interface BackButtonProps {
   onPress: () => void;
 }
 
+// Apple's Human Interface Guidelines minimum tappable touch target — the visual chip could be
+// smaller, but the tap area shouldn't be.
 const SIZE = 44;
 
 // Matches Apple's iOS 26 circular Liquid Glass back control (seen in Photos, Safari, Maps) —

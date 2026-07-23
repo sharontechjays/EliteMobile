@@ -67,6 +67,9 @@ export const useRosterViewModel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Reads whichever selected worker .find() happens to return first — safe only because
+  // toggleWorker below refuses to let a worker of a different direction join the selection in the
+  // first place, so every currently-selected worker is guaranteed to share one direction.
   const currentDirection: "IN" | "OUT" | null =
     selectedIds.size === 0
       ? null
@@ -76,6 +79,9 @@ export const useRosterViewModel = () => {
     const worker = workers.find((w) => w.id === id);
     if (!worker) return;
     const direction = DIRECTION_FOR_STATUS[worker.statusKind];
+    // Locks multi-select to one direction at a time: once any worker is selected, only workers
+    // needing the same direction (or already-selected ones, so they can still be deselected) can
+    // be added — you can't bulk clock-in and clock-out in the same batch.
     if (currentDirection !== null && direction !== currentDirection && !selectedIds.has(id)) return;
 
     setSelectedIds((prev) => {
@@ -89,6 +95,9 @@ export const useRosterViewModel = () => {
   const rows = [
     ...workers.map((worker) => {
       const direction = DIRECTION_FOR_STATUS[worker.statusKind];
+      // Mirrors toggleWorker's own guard above (same condition, read-only here) — drives row
+      // dimming/disabling in the UI so an ineligible-direction row visibly can't be tapped,
+      // rather than being tappable and then silently rejected.
       const eligible = currentDirection === null || direction === currentDirection || selectedIds.has(worker.id);
       return {
         id: worker.id,
@@ -125,6 +134,9 @@ export const useRosterViewModel = () => {
 
   const onAddFromDirectory = (id: string) => {
     const worker = directory.find((d) => d.id === id);
+    // Silently refuses a worker already assigned to another crew (worker.assignedTo set) — no
+    // error toast, since search results already exclude/gray these out; this guard exists for the
+    // case a stale result gets tapped anyway (e.g. the underlying assignment changed mid-search).
     if (!worker || worker.assignedTo) return;
     setProvisional((prev) => [...prev, { id: worker.id, name: worker.name }]);
     setRequestOpen(false);
@@ -144,6 +156,9 @@ export const useRosterViewModel = () => {
       }));
 
   const eligibleSelectedIds = workers.filter((w) => selectedIds.has(w.id)).map((w) => w.id);
+  // For a mixed crew (some need IN, some need OUT), the bulk button always defaults to clocking
+  // everyone IN rather than OUT — getting a crew clocked in and working is the more time-sensitive
+  // action at the start of a shift than clocking a mixed group out.
   const bulkDirection: "IN" | "OUT" = workers.some((w) => DIRECTION_FOR_STATUS[w.statusKind] === "IN") ? "IN" : "OUT";
   const bulkIds = workers.filter((w) => DIRECTION_FOR_STATUS[w.statusKind] === bulkDirection).map((w) => w.id);
 

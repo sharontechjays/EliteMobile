@@ -33,6 +33,8 @@ export const useTimesheetViewModel = ({ onSubmitted }: UseTimesheetViewModelArgs
   const load = useCallback(async () => {
     const result = await new GetDailyTimesheetUseCase(timesheetReader).execute();
     if (result.success) setTimesheet(result.data);
+    // Empty deps deliberately: timesheetReader is a DI-provided singleton stable for the app's
+    // lifetime; re-running this on every render would refetch unnecessarily.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -49,6 +51,10 @@ export const useTimesheetViewModel = ({ onSubmitted }: UseTimesheetViewModelArgs
   const crew = timesheet?.crew ?? [];
   const pending = idx < crew.length;
   const allDone = !pending;
+  // Clamps idx to the last valid index once the crew is exhausted (idx === crew.length after the
+  // final onAck/onDispute) so `current` still resolves to the last worker's data — used for
+  // display purposes (workerName, totalHoursLabel) on the "all done" screen — rather than
+  // becoming undefined the moment idx runs past the array.
   const current: CrewMemberTimesheet | null = crew[Math.min(idx, crew.length - 1)] ?? null;
 
   // entry.label is mock English content (see InMemoryTimesheet.adapter.ts's own comment) for
@@ -88,6 +94,9 @@ export const useTimesheetViewModel = ({ onSubmitted }: UseTimesheetViewModelArgs
   }, [pending, current, idx, crew]);
 
   const onDispute = useCallback(() => {
+    // Silent no-op on an empty/whitespace-only reason — the Dispute button is only ever meant to
+    // be tappable once a reason is entered (disabled via canDispute-equivalent gating in the
+    // screen), so this is a defensive guard rather than a user-facing validation path.
     if (!pending || !current || !reason.trim()) return;
     setIdx(idx + 1);
     setReason("");
@@ -102,6 +111,9 @@ export const useTimesheetViewModel = ({ onSubmitted }: UseTimesheetViewModelArgs
       return;
     }
     setSubmitting(true);
+    // No real submit endpoint exists yet — this fixed 300ms delay only simulates network latency
+    // long enough for the submitting-state UI to be visible, same pattern as
+    // useSyncQueue.viewModel.tsx's onSyncNow.
     await new Promise((resolve) => setTimeout(resolve, 300));
     setSubmitting(false);
     onSubmitted();

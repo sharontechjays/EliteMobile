@@ -17,6 +17,9 @@ export type CaptureTicketAttachmentError =
   | { type: "SAVE_FAILED" };
 
 export class CaptureTicketAttachmentUseCase {
+  // generateId/now are injected rather than calling Crypto.randomUUID()/Date.now() directly, so
+  // this usecase stays framework-free (no expo-crypto import) and its output is deterministic in
+  // tests — see CaptureTicketAttachment.usecase.test.ts's fixed GENERATED_ID/NOW constants.
   constructor(
     private readonly mediaCapture: MediaCapture,
     private readonly store: TicketAttachmentsStore,

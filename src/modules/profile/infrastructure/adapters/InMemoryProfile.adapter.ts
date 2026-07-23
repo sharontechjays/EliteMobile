@@ -26,6 +26,9 @@ export class InMemoryProfileAdapter implements ProfileReader {
   constructor(private readonly keyValueStore: KeyValueStore) {}
 
   async read(): Promise<Result<ProfileSummary, { type: "READ_FAILED" }>> {
+    // employeeCode is the one field with a genuine real source (the code entered at sign-in,
+    // persisted under SESSION_EMPLOYEE_CODE_KEY — see useSignIn.viewModel.tsx) — every other
+    // field has no real backend to read from yet, so it stays mock until one exists.
     const realCode = this.keyValueStore.getString(SESSION_EMPLOYEE_CODE_KEY);
     return ok(realCode ? { ...MOCK_PROFILE, employeeCode: realCode } : MOCK_PROFILE);
   }

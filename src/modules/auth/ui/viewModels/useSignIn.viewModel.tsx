@@ -4,6 +4,8 @@ import { SignInUseCase } from "../../core/usecases/SignIn.usecase";
 import { CrewLeaderSession } from "../../core/entities/CrewLeaderSession.entity";
 
 const CODE_LENGTH = 5;
+// How long the keypad shows its error/shake state before clearing the code and accepting input
+// again — long enough to register as a deliberate error state, short enough not to feel stuck.
 const ERROR_DISPLAY_MS = 350;
 export const SESSION_EMPLOYEE_CODE_KEY = "session.employeeCode";
 
@@ -17,6 +19,9 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
   const [hasError, setHasError] = useState(false);
   const submitting = useRef(false);
 
+  // A ref rather than state: submit() is called from onKeyPress synchronously on "✓", and a
+  // second fast tap could fire before the first render/state-update from setHasError=false
+  // cycles through — a ref reads/writes immediately without waiting on a render, closing that gap.
   const submit = useCallback(
     async (fullCode: string) => {
       if (submitting.current) return;
@@ -45,6 +50,9 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
 
   const onKeyPress = useCallback(
     (key: string) => {
+      // Freeze the keypad for the duration of the error/shake state — otherwise a worker who
+      // keeps tapping after a wrong code would build up a new code underneath the error display,
+      // which then gets silently wiped by submit()'s own setCode("") once the timeout fires.
       if (hasError) return;
 
       if (key === "⌫") {

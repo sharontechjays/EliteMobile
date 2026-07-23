@@ -26,6 +26,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const idCounter = useRef(0);
 
   useEffect(() => {
+    // Fire-and-forget: the in-app notification log (state.log/push above) works regardless of OS
+    // notification permission — permission only affects whether push() also surfaces a system
+    // banner via scheduleNotificationAsync, so a denial or rejection here isn't a failure worth
+    // handling or blocking on.
     Notifications.requestPermissionsAsync();
   }, []);
 

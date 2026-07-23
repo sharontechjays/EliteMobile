@@ -7,6 +7,9 @@ import { GetOrCreateDeviceKeyPairUseCase } from "../../core/usecases/GetOrCreate
 import { RegisterDeviceUseCase } from "../../core/usecases/RegisterDevice.usecase";
 import { DeviceRegistrationStatus } from "../../core/entities/DeviceRegistration.entity";
 
+// Mock seed value standing in for whatever a real device-naming flow would default to — not a
+// meaningful business rule, just placeholder content matching this prototype's other mock data
+// (see elite-mobile-clean-architecture's localization section on mock-data conventions).
 const DEFAULT_NICKNAME = "Chesterfield – Device 2";
 
 type SecuringStatus = "securing" | "secured" | "failed";
@@ -31,6 +34,8 @@ export const useDeviceRegistrationViewModel = ({ onContinue }: UseDeviceRegistra
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [hardwareBacked, setHardwareBacked] = useState(false);
 
+  // Device.osName falls back to "iOS" specifically (not a generic "unknown OS" string) because
+  // this app is iOS-only for now — an Android build would need this fallback revisited.
   const deviceModel = `${Device.modelName ?? t.unknownDevice} · ${Device.osName ?? "iOS"} ${Device.osVersion ?? t.unknownVersion}`;
   const appVersion = Constants.expoConfig?.version ?? t.unknownVersion;
 
@@ -49,6 +54,9 @@ export const useDeviceRegistrationViewModel = ({ onContinue }: UseDeviceRegistra
     } else {
       setSecuringStatus("failed");
     }
+    // Empty deps deliberately: this must run exactly once per mount (plus on manual retry via
+    // onRetrySecure below), never automatically re-run on a re-render — deviceIdentityKeyStore is
+    // a DI-provided singleton stable for the app's lifetime, so omitting it is safe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -21,6 +21,9 @@ function loadPersisted(getString: (key: string) => string | null): TimersState {
   try {
     return JSON.parse(raw) as TimersState;
   } catch {
+    // A corrupted/unparseable persisted blob resets all timers to initial state rather than
+    // crashing app startup — silently losing in-progress timer state is an acceptable trade-off
+    // against the app failing to launch at all.
     return initialTimersState;
   }
 }
@@ -53,6 +56,10 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
+  // Built once via useRef (not recreated each render) and its methods close over stateRef rather
+  // than state directly — this keeps the context value's identity stable across every tick/bump,
+  // so consumers reading it via useContext don't re-render just because the provider did, while
+  // still reading fresh data on each call through stateRef.current.
   const value = useRef<TimerContextValue>({
     getSeconds: (id) => {
       const entry = stateRef.current.entries[id];

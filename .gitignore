@@ -2,6 +2,6 @@
 /.expo
 /.maestro/screenshots
 /.superpowers
-/.claude
+/.claude/settings.local.json
 /.vscode
 node_modules

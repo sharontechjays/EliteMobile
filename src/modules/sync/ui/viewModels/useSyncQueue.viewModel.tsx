@@ -24,6 +24,10 @@ export const useSyncQueueViewModel = () => {
   const onSyncNow = useCallback(async () => {
     if (syncing) return;
     setSyncing(true);
+    // No real sync engine exists yet (see elite-mobile-clean-architecture: the Sync Queue screen
+    // is read-only over mock data) — this fixed 400ms delay only simulates "syncing" long enough
+    // for the button's own loading state to be visible, it isn't tied to any real network timing
+    // and the queue's contents never actually change as a result.
     await new Promise((resolve) => setTimeout(resolve, 400));
     setSyncing(false);
   }, [syncing]);

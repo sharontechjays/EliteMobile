@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { HttpExampleNotesAdapter } from "../../infrastructure/adapters/HttpExampleNotes.adapter";
-
-const api = new HttpExampleNotesAdapter();
+import { useDependencies } from "@app/react/useDependencies";
 
 export const exampleNotesQueryKey = ["apiIntegrationExample", "notes"] as const;
 
@@ -10,10 +8,12 @@ export const exampleNotesQueryKey = ["apiIntegrationExample", "notes"] as const;
 // app/_layout.tsx's PersistQueryClientProvider) instead of hanging in a loading state or
 // erroring — exactly what a field crew losing signal mid-shift needs.
 export function useExampleNotesQuery() {
+  const { exampleNotesApi } = useDependencies();
+
   return useQuery({
     queryKey: exampleNotesQueryKey,
     queryFn: async () => {
-      const result = await api.list();
+      const result = await exampleNotesApi.list();
       if (!result.success) throw new Error(result.error.type);
       return result.data;
     },

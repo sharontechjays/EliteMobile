@@ -14,6 +14,7 @@ import { InMemoryTicketAttachmentsStoreAdapter } from "@modules/tickets/infrastr
 import { InMemoryTimesheetAdapter } from "@modules/timesheet/infrastructure/adapters/InMemoryTimesheet.adapter";
 import { InMemorySyncQueueAdapter } from "@modules/sync/infrastructure/adapters/InMemorySyncQueue.adapter";
 import { InMemoryProfileAdapter } from "@modules/profile/infrastructure/adapters/InMemoryProfile.adapter";
+import { HttpExampleNotesAdapter } from "@modules/apiIntegrationExample/infrastructure/adapters/HttpExampleNotes.adapter";
 
 // Dev profile: local-only adapters, now backed by real MMKV persistence for the shared
 // key-value store (device registration, app readiness, and timer state all survive
@@ -38,5 +39,6 @@ export const buildDevDependencies = (): Dependencies => {
     timesheetReader: new InMemoryTimesheetAdapter(),
     syncQueueReader: new InMemorySyncQueueAdapter(),
     profileReader: new InMemoryProfileAdapter(keyValueStore),
+    exampleNotesApi: new HttpExampleNotesAdapter(),
   };
 };
