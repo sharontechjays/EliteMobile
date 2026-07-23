@@ -3,9 +3,12 @@ import { AppReadinessReader } from "@modules/splash/core/ports/AppReadinessReade
 import { DeviceRegistrar } from "@modules/deviceRegistration/core/ports/DeviceRegistrar.port";
 import { DeviceIdentityKeyStore } from "@modules/deviceRegistration/core/ports/DeviceIdentityKeyStore.port";
 import { HomeSummaryReader } from "@modules/home/core/ports/HomeSummaryReader.port";
+import { BatteryReader } from "@modules/home/core/ports/BatteryReader.port";
+import { GpsAvailabilityReader } from "@modules/home/core/ports/GpsAvailabilityReader.port";
 import { SessionAuthenticator } from "@modules/auth/core/ports/SessionAuthenticator.port";
 import { RosterReader } from "@modules/roster/core/ports/RosterReader.port";
 import { PunchRecorder } from "@modules/clock/core/ports/PunchRecorder.port";
+import { WorkerStatusRecorder } from "@modules/clock/core/ports/WorkerStatusRecorder.port";
 import { NoteSaver } from "@modules/notes/core/ports/NoteSaver.port";
 import { TicketsReader } from "@modules/tickets/core/ports/TicketsReader.port";
 import { MediaCapture } from "@modules/tickets/core/ports/MediaCapture.port";
@@ -21,9 +24,12 @@ export interface Dependencies {
   deviceRegistrar: DeviceRegistrar;
   deviceIdentityKeyStore: DeviceIdentityKeyStore;
   homeSummaryReader: HomeSummaryReader;
+  batteryReader: BatteryReader;
+  gpsAvailabilityReader: GpsAvailabilityReader;
   sessionAuthenticator: SessionAuthenticator;
   rosterReader: RosterReader;
   punchRecorder: PunchRecorder;
+  workerStatusRecorder: WorkerStatusRecorder;
   noteSaver: NoteSaver;
   ticketsReader: TicketsReader;
   mediaCapture: MediaCapture;

@@ -530,9 +530,9 @@ describe("useTicketDetailViewModel — ticket attachments", () => {
 
 const CREW_TICKET: JobTicket = { ...TICKET, crew: [{ id: "w1", name: "H. Jackson", initials: "HJ", onJob: true }] };
 
-function buildComplianceTestDeps(): Dependencies {
+function buildComplianceTestDeps(keyValueStore: FakeKeyValueStore): Dependencies {
   return {
-    keyValueStore: new FakeKeyValueStore(),
+    keyValueStore,
     mediaCapture: fakeMediaCapture(),
     ticketAttachmentsStore: fakeTicketAttachmentsStore(),
     ticketsReader: { read: async () => ok([CREW_TICKET]), readOne: async () => ok(CREW_TICKET) },
@@ -541,7 +541,7 @@ function buildComplianceTestDeps(): Dependencies {
 
 function complianceWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <DependenciesProvider dependencies={buildComplianceTestDeps()}>
+    <DependenciesProvider dependencies={buildComplianceTestDeps(new FakeKeyValueStore())}>
       <LanguageProvider>
         <TimerProvider>
           <NotificationsProvider>{children}</NotificationsProvider>
@@ -549,6 +549,23 @@ function complianceWrapper({ children }: { children: React.ReactNode }) {
       </LanguageProvider>
     </DependenciesProvider>
   );
+}
+
+// Used to simulate an app kill/restart: two independent render trees (fresh TimerProvider,
+// fresh NotificationsProvider — nothing carries over in memory) sharing the same underlying
+// persisted store, the way a real app relaunch would still have the same MMKV-backed storage.
+function complianceWrapperWithStore(keyValueStore: FakeKeyValueStore) {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <DependenciesProvider dependencies={buildComplianceTestDeps(keyValueStore)}>
+        <LanguageProvider>
+          <TimerProvider>
+            <NotificationsProvider>{children}</NotificationsProvider>
+          </TimerProvider>
+        </LanguageProvider>
+      </DependenciesProvider>
+    );
+  };
 }
 
 function useComplianceHarness(ticketId: string) {
@@ -637,5 +654,42 @@ describe("useTicketDetailViewModel — automatic meal-break compliance cascade",
     );
     expect(afterSecondCascade.length).toBeGreaterThanOrEqual(1);
     expect(afterSecondCascade[0]).toMatchObject({ icon: "▲", body: en.ticketDetail.mealEscalationBody("H. Jackson") });
+  });
+
+  it("survives an app kill/restart: doesn't re-fire an already-delivered alert, and still fires the next one", async () => {
+    const sharedStore = new FakeKeyValueStore();
+
+    const before = renderHook(() => useComplianceHarness("yard-prep"), {
+      wrapper: complianceWrapperWithStore(sharedStore),
+    });
+    await act(async () => {});
+
+    act(() => before.result.current.vm.handlers.onToggleJob());
+    act(() => jest.advanceTimersByTime(4 * 60 * 60 * 1000)); // fires the 4h crew-only reminder
+    expect(before.result.current.notifications.log).toHaveLength(1);
+
+    // Simulate the app being killed: unmount everything (fresh TimerProvider and
+    // NotificationsProvider on the next mount — nothing survives in memory), but the same
+    // underlying persisted store, the way a real relaunch still has the same MMKV storage.
+    before.unmount();
+
+    const after = renderHook(() => useComplianceHarness("yard-prep"), {
+      wrapper: complianceWrapperWithStore(sharedStore),
+    });
+    await act(async () => {});
+
+    // Elapsed job time (persisted) is still ~4h — the already-delivered reminder must not
+    // fire again just because the view model remounted with fresh in-memory state.
+    act(() => jest.advanceTimersByTime(1000));
+    expect(after.result.current.notifications.log).toHaveLength(0);
+
+    // The cascade itself wasn't lost either — reaching the next checkpoint (4h15) still
+    // escalates correctly, proving alertsFired resumed from 1, not from 0.
+    act(() => jest.advanceTimersByTime(15 * 60 * 1000));
+    expect(after.result.current.notifications.log).toHaveLength(1);
+    expect(after.result.current.notifications.log[0]).toMatchObject({
+      icon: "▲",
+      title: en.ticketDetail.mealEscalationTitle,
+    });
   });
 });
