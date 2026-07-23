@@ -1,3 +1,5 @@
+import { MAX_NOTIF_LOG } from "@/constants/appConstants";
+
 export interface NotifLogEntry {
   id: string;
   icon: string;
@@ -11,11 +13,6 @@ export interface NotificationsState {
 }
 
 export type NotificationsAction = { type: "PUSH"; entry: NotifLogEntry };
-
-// The notifications log/panel only ever shows a short recent list, not a paginated history — 6
-// keeps it scrollable on one screen without a "load more" affordance. Older entries beyond this
-// cap are silently dropped (see PUSH below), not archived anywhere.
-export const MAX_NOTIF_LOG = 6;
 
 export const initialNotificationsState: NotificationsState = { log: [] };
 

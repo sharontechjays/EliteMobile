@@ -5,6 +5,7 @@ import { DependenciesProvider } from "@app/react/DependenciesProvider";
 import { LanguageProvider } from "@app/react/language/LanguageProvider";
 import { TimerProvider } from "@app/react/timer/TimerProvider";
 import { NotificationsProvider } from "@app/react/notifications/NotificationsProvider";
+import { useNotifications } from "@app/react/notifications/useNotifications";
 import { Dependencies } from "@app/dependencies/Dependencies.type";
 import { ok, fail } from "@/types/Result";
 import { en } from "@app/react/language/translations/en";
@@ -524,5 +525,117 @@ describe("useTicketDetailViewModel — ticket attachments", () => {
 
     act(() => result.current.handlers.onClosePreview());
     expect(result.current.state.previewAttachment).toBeNull();
+  });
+});
+
+const CREW_TICKET: JobTicket = { ...TICKET, crew: [{ id: "w1", name: "H. Jackson", initials: "HJ", onJob: true }] };
+
+function buildComplianceTestDeps(): Dependencies {
+  return {
+    keyValueStore: new FakeKeyValueStore(),
+    mediaCapture: fakeMediaCapture(),
+    ticketAttachmentsStore: fakeTicketAttachmentsStore(),
+    ticketsReader: { read: async () => ok([CREW_TICKET]), readOne: async () => ok(CREW_TICKET) },
+  } as unknown as Dependencies;
+}
+
+function complianceWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <DependenciesProvider dependencies={buildComplianceTestDeps()}>
+      <LanguageProvider>
+        <TimerProvider>
+          <NotificationsProvider>{children}</NotificationsProvider>
+        </TimerProvider>
+      </LanguageProvider>
+    </DependenciesProvider>
+  );
+}
+
+function useComplianceHarness(ticketId: string) {
+  const vm = useTicketDetailViewModel({ ticketId, onGoNotes: jest.fn(), onGoTravel: jest.fn() });
+  const notifications = useNotifications();
+  return { vm, notifications };
+}
+
+describe("useTicketDetailViewModel — automatic meal-break compliance cascade", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("fires a crew-only reminder at the 4-hour mark when no break has started", async () => {
+    const { result } = renderHook(() => useComplianceHarness("yard-prep"), { wrapper: complianceWrapper });
+    await act(async () => {});
+
+    act(() => result.current.vm.handlers.onToggleJob());
+    act(() => jest.advanceTimersByTime(4 * 60 * 60 * 1000));
+
+    expect(result.current.notifications.log).toHaveLength(1);
+    expect(result.current.notifications.log[0]).toMatchObject({
+      icon: "◔",
+      title: en.ticketDetail.mealReminderTitle,
+      body: en.ticketDetail.mealReminderBody,
+    });
+  });
+
+  it("escalates to crew+supervisor every 15 minutes after the reminder, capped at 4 alerts total", async () => {
+    const { result } = renderHook(() => useComplianceHarness("yard-prep"), { wrapper: complianceWrapper });
+    await act(async () => {});
+
+    act(() => result.current.vm.handlers.onToggleJob());
+    act(() => jest.advanceTimersByTime(4 * 60 * 60 * 1000 + 46 * 60 * 1000)); // past the fourth checkpoint (4h45)
+
+    expect(result.current.notifications.log).toHaveLength(4);
+    expect(result.current.notifications.log[1]).toMatchObject({
+      icon: "▲",
+      title: en.ticketDetail.mealEscalationTitle,
+      body: en.ticketDetail.mealEscalationBody("H. Jackson"),
+    });
+
+    // No fifth alert even well past the fourth checkpoint.
+    act(() => jest.advanceTimersByTime(60 * 60 * 1000));
+    expect(result.current.notifications.log).toHaveLength(4);
+  });
+
+  it("does not escalate at all if the break is started before the 4-hour deadline", async () => {
+    const { result } = renderHook(() => useComplianceHarness("yard-prep"), { wrapper: complianceWrapper });
+    await act(async () => {});
+
+    act(() => result.current.vm.handlers.onToggleJob());
+    act(() => jest.advanceTimersByTime(3 * 60 * 60 * 1000));
+    act(() => result.current.vm.handlers.onToggleJobPause());
+    act(() => result.current.vm.handlers.onStartMeal());
+    act(() => jest.advanceTimersByTime(2 * 60 * 60 * 1000));
+
+    const complianceAlerts = result.current.notifications.log.filter(
+      (entry) =>
+        entry.title === en.ticketDetail.mealReminderTitle || entry.title === en.ticketDetail.mealEscalationTitle,
+    );
+    expect(complianceAlerts).toHaveLength(0);
+  });
+
+  it("starts the second (11-hour) cascade once the first break is completed", async () => {
+    const { result } = renderHook(() => useComplianceHarness("yard-prep"), { wrapper: complianceWrapper });
+    await act(async () => {});
+
+    act(() => result.current.vm.handlers.onToggleJob());
+    act(() => jest.advanceTimersByTime(60 * 60 * 1000)); // 1h in
+    act(() => result.current.vm.handlers.onToggleJobPause());
+    act(() => result.current.vm.handlers.onStartMeal());
+    act(() => jest.advanceTimersByTime(30 * 60 * 1000));
+    act(() => result.current.vm.handlers.onEndMeal());
+    act(() => result.current.vm.handlers.onContinueJob());
+
+    const beforeSecondCascade = result.current.notifications.log.filter(
+      (entry) => entry.title === en.ticketDetail.mealEscalationTitle,
+    );
+    expect(beforeSecondCascade).toHaveLength(0);
+
+    // Job resumes counting from 1h (frozen through the break) — 10h more reaches 11h total.
+    act(() => jest.advanceTimersByTime(10 * 60 * 60 * 1000));
+
+    const afterSecondCascade = result.current.notifications.log.filter(
+      (entry) => entry.title === en.ticketDetail.mealEscalationTitle,
+    );
+    expect(afterSecondCascade.length).toBeGreaterThanOrEqual(1);
+    expect(afterSecondCascade[0]).toMatchObject({ icon: "▲", body: en.ticketDetail.mealEscalationBody("H. Jackson") });
   });
 });

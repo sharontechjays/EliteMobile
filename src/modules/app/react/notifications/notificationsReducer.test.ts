@@ -1,4 +1,5 @@
-import { notificationsReducer, initialNotificationsState, MAX_NOTIF_LOG, NotifLogEntry } from "./notificationsReducer";
+import { MAX_NOTIF_LOG } from "@/constants/appConstants";
+import { notificationsReducer, initialNotificationsState, NotifLogEntry } from "./notificationsReducer";
 
 const entry = (id: string): NotifLogEntry => ({
   id,

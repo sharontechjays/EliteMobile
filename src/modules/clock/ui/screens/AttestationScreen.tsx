@@ -7,8 +7,9 @@ import { GlassSurface } from "@/ui/components/atoms/GlassSurface";
 import { colors } from "@/ui/theme/colors";
 import { typography, fontMono, fontDisplay } from "@/ui/theme/typography";
 import { SCREEN_TOP_INSET_DIRECT } from "@/ui/theme/layout";
+import { ATTESTATION_MAX_CODE_LENGTH } from "@/constants/appConstants";
 import { useLanguage } from "@app/react/language/useLanguage";
-import { useAttestationViewModel, MAX_CODE_LENGTH } from "../viewModels/useAttestation.viewModel";
+import { useAttestationViewModel } from "../viewModels/useAttestation.viewModel";
 import { AttestationWorker } from "../../core/entities/AttestationWorker.entity";
 
 interface AttestationScreenProps {
@@ -69,7 +70,7 @@ export function AttestationScreen({ queue, onGoRoster, onDone }: AttestationScre
             onChangeText={handlers.onCodeChange}
             secureTextEntry
             keyboardType="number-pad"
-            maxLength={MAX_CODE_LENGTH}
+            maxLength={ATTESTATION_MAX_CODE_LENGTH}
             placeholder="• • • •"
             placeholderTextColor={colors.faint}
             style={[styles.codeInput, { borderColor: codeError ? colors.off : colors.hairline25 }]}

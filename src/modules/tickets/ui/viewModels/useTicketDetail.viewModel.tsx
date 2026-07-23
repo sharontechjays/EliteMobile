@@ -8,13 +8,41 @@ import { useLanguage } from "@app/react/language/useLanguage";
 import { GetTicketDetailUseCase } from "../../core/usecases/GetTicketDetail.usecase";
 import { GetTicketAttachmentsUseCase } from "../../core/usecases/GetTicketAttachments.usecase";
 import { CaptureTicketAttachmentUseCase } from "../../core/usecases/CaptureTicketAttachment.usecase";
+import { buildMealBreakCascade, getNextDueMealBreakCheckpoint } from "../../core/usecases/deriveMealBreakAlert.usecase";
+import {
+  FIRST_MEAL_ESCALATION_INTERVAL_MINUTES,
+  FIRST_MEAL_MAX_ALERTS,
+  FIRST_MEAL_REMINDER_HOUR,
+  MEAL_BREAK_MINIMUM_SECONDS,
+  SECOND_MEAL_CASCADE_START_HOUR,
+  SECOND_MEAL_ESCALATION_INTERVAL_MINUTES,
+  SECOND_MEAL_MAX_ALERTS,
+  SECONDS_PER_HOUR,
+} from "@/constants/appConstants";
 import { JobTicket } from "../../core/entities/JobTicket.entity";
 import { TicketAttachment, TicketAttachmentKind } from "../../core/entities/TicketAttachment.entity";
 
-const MEAL_MINIMUM_MINUTES = 30;
-const MEAL_MINIMUM_SECONDS = MEAL_MINIMUM_MINUTES * 60;
-const MEAL_SUGGEST_AFTER_HOURS = 4;
-const SECONDS_PER_HOUR = 3600;
+const MEAL_MINIMUM_SECONDS = MEAL_BREAK_MINIMUM_SECONDS;
+const MEAL_SUGGEST_AFTER_HOURS = FIRST_MEAL_REMINDER_HOUR;
+
+// Crew-only reminder at the 4h mark, then crew+supervisor escalations every 15 min up to 4
+// alerts total (4h/4h15/4h30/4h45) — see src/constants/appConstants.ts for the tunable values.
+const FIRST_MEAL_CASCADE = buildMealBreakCascade({
+  startHour: FIRST_MEAL_REMINDER_HOUR,
+  escalationIntervalMinutes: FIRST_MEAL_ESCALATION_INTERVAL_MINUTES,
+  maxAlerts: FIRST_MEAL_MAX_ALERTS,
+  firstAlertAudience: "crew",
+});
+
+// Second meal-break cascade: starts at the 11th hour (ahead of the 12th-hour CA penalty
+// point), crew+supervisor from the first alert since this is already past the manual flow's
+// own "suggest" nudge.
+const SECOND_MEAL_CASCADE = buildMealBreakCascade({
+  startHour: SECOND_MEAL_CASCADE_START_HOUR,
+  escalationIntervalMinutes: SECOND_MEAL_ESCALATION_INTERVAL_MINUTES,
+  maxAlerts: SECOND_MEAL_MAX_ALERTS,
+  firstAlertAudience: "crewAndSupervisor",
+});
 
 interface UseTicketDetailViewModelArgs {
   ticketId: string;
@@ -56,6 +84,11 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   const [previewAttachment, setPreviewAttachment] = useState<TicketAttachment | null>(null);
   const [attachmentErrorMessage, setAttachmentErrorMessage] = useState<string | null>(null);
   const [attachmentErrorIsPermission, setAttachmentErrorIsPermission] = useState(false);
+  // How many meal breaks have been fully logged on this ticket so far — determines which
+  // automatic compliance cascade (first vs. second) is currently being monitored below.
+  const [mealBreaksCompletedCount, setMealBreaksCompletedCount] = useState(0);
+  const [firstMealAlertsFired, setFirstMealAlertsFired] = useState(0);
+  const [secondMealAlertsFired, setSecondMealAlertsFired] = useState(0);
 
   const jobTimerId = `job:${ticketId}`;
   const mealTimerId = `meal:${ticketId}`;
@@ -117,6 +150,46 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   const estimatedSeconds = (ticket?.estimatedHours ?? 0) * SECONDS_PER_HOUR;
   const jobOverEstimate = estimatedSeconds > 0 && jobSeconds > estimatedSeconds;
 
+  // The crew member whose meal break is being tracked — the on-job crew member's name, so the
+  // escalation copy ("<name> has not taken a meal break") reads as a specific person rather than
+  // a generic warning. Falls back to a generic label if no crew member is currently marked onJob.
+  const onJobMemberName = ticket?.crew.find((member) => member.onJob)?.name ?? t.mealAlertFallbackMemberName;
+
+  // Automatic, time-based compliance reminders — distinct from the manual "Pause for meal
+  // break" flow above. Runs alongside it: once the crew leader engages that flow at all
+  // (mealPhase leaves "none"), the automated cascade stops, since the manual flow's own UI is
+  // already prompting them. The first cascade (4h-5h) monitors the first meal break; once one
+  // has been logged, the second cascade (11h, ahead of the 12th-hour CA penalty) takes over.
+  useEffect(() => {
+    if (!ticket || mealPhase !== "none") return;
+    if (mealBreaksCompletedCount === 0) {
+      const dueIndex = getNextDueMealBreakCheckpoint(FIRST_MEAL_CASCADE, jobSeconds, firstMealAlertsFired);
+      if (dueIndex === null) return;
+      const checkpoint = FIRST_MEAL_CASCADE[dueIndex];
+      if (checkpoint.audience === "crew") {
+        push({ icon: "◔", title: t.mealReminderTitle, body: t.mealReminderBody });
+      } else {
+        push({ icon: "▲", title: t.mealEscalationTitle, body: t.mealEscalationBody(onJobMemberName) });
+      }
+      setFirstMealAlertsFired(dueIndex + 1);
+    } else if (mealBreaksCompletedCount === 1) {
+      const dueIndex = getNextDueMealBreakCheckpoint(SECOND_MEAL_CASCADE, jobSeconds, secondMealAlertsFired);
+      if (dueIndex === null) return;
+      push({ icon: "▲", title: t.mealEscalationTitle, body: t.mealEscalationBody(onJobMemberName) });
+      setSecondMealAlertsFired(dueIndex + 1);
+    }
+  }, [
+    ticket,
+    mealPhase,
+    mealBreaksCompletedCount,
+    jobSeconds,
+    firstMealAlertsFired,
+    secondMealAlertsFired,
+    push,
+    t,
+    onJobMemberName,
+  ]);
+
   const onToggleJob = useCallback(() => {
     if (jobTimerRunning) {
       timer.pause(jobTimerId);
@@ -156,6 +229,9 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
     if (timer.getSeconds(mealTimerId) < MEAL_MINIMUM_SECONDS) return;
     timer.pause(mealTimerId);
     setMealPhase("done");
+    // Advances which automatic compliance cascade (first vs. second) is monitored next — see
+    // the effect above.
+    setMealBreaksCompletedCount((count) => count + 1);
     push({
       icon: "✓",
       title: t.mealBreakLoggedTitle,

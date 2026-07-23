@@ -3,8 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { colors } from "@/ui/theme/colors";
 import { MediaItem } from "@/ui/utils/MediaItem.type";
-
-const THUMBNAIL_SIZE = 64;
+import { THUMBNAIL_SIZE } from "@/constants/appConstants";
 
 interface MediaThumbnailProps {
   media: MediaItem;

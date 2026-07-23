@@ -4,13 +4,15 @@ import * as Haptics from "expo-haptics";
 import { GlassSurface } from "./GlassSurface";
 import { colors } from "../../theme/colors";
 import { fontMono } from "../../theme/typography";
+import {
+  KEYPAD_COLUMNS,
+  KEYPAD_GAP,
+  KEYPAD_KEY_HEIGHT,
+  KEYPAD_KEY_RADIUS,
+  KEYPAD_KEY_WIDTH,
+} from "@/constants/appConstants";
 
-const KEY_WIDTH = 68;
-const KEY_HEIGHT = 68;
-const KEY_RADIUS = 21;
-const GAP = 16;
-const COLUMNS = 3;
-const GRID_WIDTH = KEY_WIDTH * COLUMNS + GAP * (COLUMNS - 1);
+const GRID_WIDTH = KEYPAD_KEY_WIDTH * KEYPAD_COLUMNS + KEYPAD_GAP * (KEYPAD_COLUMNS - 1);
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"];
 
@@ -53,7 +55,7 @@ export function Keypad({ onKeyPress, disabled }: KeypadProps) {
             style={[styles.keySlot, disabled && styles.disabledKey]}
           >
             <GlassSurface
-              radius={KEY_RADIUS}
+              radius={KEYPAD_KEY_RADIUS}
               interactive
               shadow={false}
               tintColor={isConfirm ? colors.jobBg : undefined}
@@ -79,13 +81,13 @@ const styles = StyleSheet.create({
     width: GRID_WIDTH,
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: GAP,
+    gap: KEYPAD_GAP,
     alignSelf: "center",
   },
-  keySlot: { width: KEY_WIDTH, height: KEY_HEIGHT, alignItems: "center", justifyContent: "center" },
+  keySlot: { width: KEYPAD_KEY_WIDTH, height: KEYPAD_KEY_HEIGHT, alignItems: "center", justifyContent: "center" },
   disabledKey: { opacity: 0.5 },
-  key: { width: KEY_WIDTH, height: KEY_HEIGHT },
-  keyContent: { width: KEY_WIDTH, height: KEY_HEIGHT, alignItems: "center", justifyContent: "center" },
+  key: { width: KEYPAD_KEY_WIDTH, height: KEYPAD_KEY_HEIGHT },
+  keyContent: { width: KEYPAD_KEY_WIDTH, height: KEYPAD_KEY_HEIGHT, alignItems: "center", justifyContent: "center" },
   keyLabel: { fontSize: 23, fontWeight: "400", color: colors.ink },
   backspaceLabel: { color: colors.dim, fontSize: 25 },
 });

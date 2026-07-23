@@ -3,9 +3,8 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { colors } from "@/ui/theme/colors";
 import { MediaItem } from "@/ui/utils/MediaItem.type";
+import { MEDIA_PREVIEW_FALLBACK_ASPECT_RATIO } from "@/constants/appConstants";
 import { CachedVideoPlayer } from "./CachedVideoPlayer";
-
-const FALLBACK_ASPECT_RATIO = 16 / 9;
 
 interface MediaPreviewModalProps {
   media: MediaItem | null;
@@ -16,7 +15,8 @@ interface MediaPreviewModalProps {
 export function MediaPreviewModal({ media, closeLabel, onClose }: MediaPreviewModalProps) {
   // Sized to the media's own portrait/landscape aspect ratio (capped by maxHeight below), rather
   // than a fixed box, so a portrait capture previews tall and a landscape one previews wide.
-  const aspectRatio = media && media.width > 0 && media.height > 0 ? media.width / media.height : FALLBACK_ASPECT_RATIO;
+  const aspectRatio =
+    media && media.width > 0 && media.height > 0 ? media.width / media.height : MEDIA_PREVIEW_FALLBACK_ASPECT_RATIO;
 
   return (
     <Modal visible={media != null} transparent animationType="fade" onRequestClose={onClose}>

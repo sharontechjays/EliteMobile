@@ -201,7 +201,27 @@ changes here have broken multiple downstream screens in the past.
 ## No Magic Numbers
 
 Extract named constants for any bare literal with meaning (`MEAL_MINIMUM_SECONDS`,
-`SECONDS_PER_HOUR`, `THUMBNAIL_SIZE`, etc.) — see any existing usecase/component for the convention.
+`SECONDS_PER_HOUR`, `THUMBNAIL_SIZE`, etc.) — never leave a bare numeric/string literal inline for a
+threshold, duration, cap, or limit.
+
+**All of these constants live in one single file for the whole app:
+`src/constants/appConstants.ts`.** Don't scatter a new constant at the top of whichever
+usecase/component/viewModel happens to need it, and don't create a second, module-local constants
+file — every module imports from this one shared file. This includes purely visual/rendering
+constants local to a single component (icon dimensions, keypad key size, grid spacing, etc.), not
+just business/domain thresholds — the rule is literal: one file, no exceptions, even where a value
+is only ever read by the one component that defines it. Group entries under a comment banner per
+domain or component (e.g. `// --- Meal break compliance ---`, `// --- Keypad ---`) so the file stays
+navigable as it grows; that grouping is organizational only — there's exactly one file and one
+import path (`@/constants/appConstants`) for every constant in the app.
+
+**Exception: design-system tokens in `src/ui/theme/`** (`colors.ts`, `typography.ts`, `layout.ts`,
+`glass.ts`) are a separate, already-established single-source convention for the app's visual
+language and stay there — don't move `SCREEN_TOP_INSET`, color values, or type-scale sizes into
+`appConstants.ts`. The distinction: theme tokens are shared design-system vocabulary consumed
+across many unrelated components; `appConstants.ts` is for a value that's meaningful/reused but
+isn't part of that shared vocabulary (a threshold, a duration, a cap, or a value some other single
+file happens to own even if only it uses it).
 
 ## Linting & Formatting
 

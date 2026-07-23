@@ -3,9 +3,8 @@ import { ActionSheetIOS, Linking } from "react-native";
 import * as Crypto from "expo-crypto";
 import { useDependencies } from "@app/react/useDependencies";
 import { useLanguage } from "@app/react/language/useLanguage";
+import { NOTES_MAX_PHOTOS } from "@/constants/appConstants";
 import { SaveNoteUseCase } from "../../core/usecases/SaveNote.usecase";
-
-const MAX_PHOTOS = 4;
 
 interface PhotoTile {
   id: string;
@@ -64,7 +63,7 @@ export const useNotesViewModel = ({ ticketName, onSaved }: UseNotesViewModelArgs
   );
 
   const onAddPhoto = useCallback(() => {
-    if (photos.length >= MAX_PHOTOS) return;
+    if (photos.length >= NOTES_MAX_PHOTOS) return;
     ActionSheetIOS.showActionSheetWithOptions(
       {
         title: t.addMediaTitle,
@@ -109,7 +108,7 @@ export const useNotesViewModel = ({ ticketName, onSaved }: UseNotesViewModelArgs
     state: {
       text,
       photos,
-      maxPhotos: MAX_PHOTOS,
+      maxPhotos: NOTES_MAX_PHOTOS,
       extraWorkFlag,
       saving,
       previewMedia,

@@ -1,12 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { useDependencies } from "@app/react/useDependencies";
+import { SIGN_IN_CODE_LENGTH, SIGN_IN_ERROR_DISPLAY_MS } from "@/constants/appConstants";
 import { SignInUseCase } from "../../core/usecases/SignIn.usecase";
 import { CrewLeaderSession } from "../../core/entities/CrewLeaderSession.entity";
 
-const CODE_LENGTH = 5;
-// How long the keypad shows its error/shake state before clearing the code and accepting input
-// again — long enough to register as a deliberate error state, short enough not to feel stuck.
-const ERROR_DISPLAY_MS = 350;
 export const SESSION_EMPLOYEE_CODE_KEY = "session.employeeCode";
 
 interface UseSignInViewModelArgs {
@@ -43,7 +40,7 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
       setTimeout(() => {
         setHasError(false);
         setCode("");
-      }, ERROR_DISPLAY_MS);
+      }, SIGN_IN_ERROR_DISPLAY_MS);
     },
     [sessionAuthenticator, keyValueStore, onSignedIn],
   );
@@ -61,17 +58,17 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
       }
 
       if (key === "✓") {
-        if (code.length === CODE_LENGTH) submit(code);
+        if (code.length === SIGN_IN_CODE_LENGTH) submit(code);
         return;
       }
 
-      setCode((prev) => (prev.length >= CODE_LENGTH ? prev : prev + key));
+      setCode((prev) => (prev.length >= SIGN_IN_CODE_LENGTH ? prev : prev + key));
     },
     [hasError, code, submit],
   );
 
   return {
-    state: { code, codeLength: CODE_LENGTH, hasError },
+    state: { code, codeLength: SIGN_IN_CODE_LENGTH, hasError },
     handlers: { onKeyPress },
   };
 };
