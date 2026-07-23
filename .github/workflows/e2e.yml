@@ -56,6 +56,10 @@ jobs:
           echo "Using simulator: $DEVICE_NAME"
           echo "SIMULATOR_NAME=$DEVICE_NAME" >> "$GITHUB_ENV"
           xcrun simctl bootstatus "$DEVICE_NAME" -b
+          # bootstatus only confirms the simulator reached "Booted" state, not that its UI
+          # (SpringBoard) is actually ready to handle requests yet — without this, the later
+          # `expo run:ios` deep-link open (xcrun simctl openurl) intermittently timed out.
+          sleep 10
 
       - name: Build and install app on simulator
         run: npx expo run:ios --no-install --device "$SIMULATOR_NAME"
