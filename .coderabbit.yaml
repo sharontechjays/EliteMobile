@@ -1,0 +1,80 @@
+language: en-US
+
+early_access: false
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "dev"
+      - "stg"
+      - "main"
+  path_filters:
+    - "!ios/**"
+    - "!android/**"
+    - "!**/*.lock"
+    - "!package-lock.json"
+    - "!**/*.xcworkspace/**"
+    - "!**/*.xcodeproj/**"
+    - "!**/DerivedData/**"
+  path_instructions:
+    - path: "src/modules/**/core/**"
+      instructions: >
+        This is the framework-free "core" layer (entities/ports/usecases) of a Clean Architecture
+        module. It must never import React, Expo, or any native/infrastructure module, and never
+        import from infrastructure/ or ui/. Usecases/adapters return Result<T,E> and never throw.
+        Flag any violation of these rules.
+    - path: "src/modules/**/infrastructure/adapters/**"
+      instructions: >
+        Adapters implement a port and map external/native data to Core entities, returning
+        Result<T,E>. They should contain no business logic beyond mapping/IO. Nothing outside
+        infrastructure/ should import an adapter directly (ui/ must go through the port type via
+        useDependencies()).
+    - path: "src/modules/**/ui/**"
+      instructions: >
+        ViewModels return { state, handlers } and call usecases via useDependencies(); screens are
+        presentation-only with no business logic. All user-facing copy must come from
+        strings.<namespace> (useLanguage()) — flag any bare/hardcoded UI string literal.
+    - path: "src/constants/appConstants.ts"
+      instructions: >
+        Single source of truth for every named constant in the app (durations, thresholds, caps,
+        sizes). Flag any new bare numeric/string literal introduced elsewhere in the diff for a
+        threshold/duration/cap that should live here instead, and flag any duplicate/local
+        constants file.
+    - path: "src/modules/app/react/language/translations/**"
+      instructions: >
+        en.ts and es.ts must stay structurally identical (same keys) per the Translations
+        interface. Flag any key added to one language file but not the other.
+    - path: "**/*.test.ts"
+      instructions: >
+        Usecases/adapters should have plain Jest unit tests asserting on Result output for both
+        success and failure paths.
+    - path: "**/*.test.tsx"
+      instructions: >
+        ViewModel tests should use renderHook with a real DependenciesProvider/LanguageProvider
+        (plus TimerProvider/NotificationsProvider/MealReminderProvider where the viewModel under
+        test needs them) and a hand-built fake Dependencies object, not shallow/jest.mock-based
+        mocking of the hooks themselves.
+    - path: "app/(tabs)/_layout.tsx"
+      instructions: >
+        This file is protected — flag any change to it as needing explicit confirmation that it's
+        intentional, since it has broken multiple downstream screens in the past.
+    - path: "src/ui/components/atoms/GlassSurface.tsx"
+      instructions: >
+        This file is protected — flag any change to it (especially to sizing/layout behavior) as
+        needing explicit confirmation that it's intentional and isolated (e.g. a color-only
+        constant swap is fine; a structural/layout change is not).
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: auto
