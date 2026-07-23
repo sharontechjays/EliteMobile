@@ -47,7 +47,7 @@ export function TopBar({ showSyncPill = true }: TopBarProps) {
     <View style={[styles.container, { top: insets.top + 4 }]} pointerEvents="box-none">
       {showSyncPill ? (
         <Pressable onPress={() => router.push("/sync-queue")}>
-          <GlassSurface radius={999} style={styles.syncPill}>
+          <View style={styles.syncPill}>
             <View style={[styles.dot, { backgroundColor: pending ? colors.idle : colors.job }]} />
             <Text
               style={[
@@ -57,7 +57,7 @@ export function TopBar({ showSyncPill = true }: TopBarProps) {
             >
               {pending ? strings.topBar.pending(pendingTotal) : strings.topBar.synced}
             </Text>
-          </GlassSurface>
+          </View>
         </Pressable>
       ) : (
         <View />

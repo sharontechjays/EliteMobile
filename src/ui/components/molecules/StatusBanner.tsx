@@ -9,7 +9,7 @@ export interface StatusBannerTone {
   accent: string;
 }
 
-const NOTIFY_ICON = "⚑";
+const NOTIFY_ICON = "✉";
 
 interface StatusBannerProps {
   icon: string;
