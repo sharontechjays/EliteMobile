@@ -26,12 +26,14 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 **Types:** `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`
 
 **Rules:**
+
 - Subject line in the imperative mood ("add", not "added"/"adds"), no trailing period, under ~72 characters.
 - Scope is the module or area touched (e.g. `feat(timesheet): ...`, `fix(sync-queue): ...`).
-- The body explains *why* a change was made when that isn't obvious from the diff — not a restatement of the diff itself.
+- The body explains _why_ a change was made when that isn't obvious from the diff — not a restatement of the diff itself.
 - One logical change per commit. Don't bundle unrelated fixes into a feature commit.
 
 **Examples:**
+
 ```
 feat(profile): add language toggle to settings row
 fix(sync-queue): correct pending-count badge when queue is empty
@@ -54,6 +56,7 @@ ui/screens/        — presentation components
 Follow this shape for new modules. Business logic belongs in `core/usecases`, not in components or view models.
 
 **Protected files — do not modify** (excluded from lint/format tooling, see `.prettierignore`):
+
 - `app/(tabs)/_layout.tsx` — the bottom tab bar
 - `src/ui/components/atoms/GlassSurface.tsx` — shared glass-surface primitive with a known content-based auto-sizing behavior other components rely on
 
