@@ -80,6 +80,8 @@ export const en: Translations = {
   },
 
   home: {
+    roleCrewLeader: "Crew leader",
+    roleSupervisor: "Supervisor",
     daySectionLabel: "Day time — yard & training",
     clockSectionLabel: "Clock in / out",
     clockButtonLabel: "Clock In / Out",

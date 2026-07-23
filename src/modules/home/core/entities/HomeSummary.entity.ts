@@ -28,10 +28,10 @@ export interface DayEntry {
 
 export interface HomeSummary {
   dateLabel: string;
-  crewLeaderLine: string;
+  crewLeaderName: string;
+  crewLeaderRole: "crewLeader" | "supervisor";
+  branch: string;
   crewLeaderInitials: WorkerId | string;
-  batteryPercent: number;
-  gpsAvailable: boolean;
   crewStatus: CrewStatus;
   nextJob: NextJob;
   dayEntries: DayEntry[];

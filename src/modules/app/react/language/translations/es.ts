@@ -95,6 +95,8 @@ export const es: Translations = {
   },
 
   home: {
+    roleCrewLeader: "Líder de cuadrilla",
+    roleSupervisor: "Supervisor",
     daySectionLabel: "Horario del día — patio y capacitación",
     clockSectionLabel: "Marcar entrada / salida",
     clockButtonLabel: "Marcar entrada / salida",

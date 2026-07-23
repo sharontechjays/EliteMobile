@@ -84,6 +84,8 @@ export interface Translations {
   };
 
   home: {
+    roleCrewLeader: string;
+    roleSupervisor: string;
     daySectionLabel: string;
     clockSectionLabel: string;
     clockButtonLabel: string;
