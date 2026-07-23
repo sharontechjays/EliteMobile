@@ -10,7 +10,7 @@ import { useDependencies } from "@app/react/useDependencies";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { useNotifications } from "@app/react/notifications/useNotifications";
 import { GetSyncQueueUseCase } from "@modules/sync/core/usecases/GetSyncQueue.usecase";
-import { deriveSyncStatus, SyncStatus } from "@modules/sync/core/usecases/deriveSyncStatus";
+import { deriveSyncStatus, SyncStatus } from "@modules/sync/core/usecases/deriveSyncStatus.usecase";
 
 interface TopBarProps {
   showSyncPill?: boolean;
