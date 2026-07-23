@@ -19,6 +19,8 @@ export interface HomeBanner {
 }
 
 const SECONDS_PER_HOUR = 3600;
+const DEFAULT_BATTERY_PERCENT = 100;
+const LOW_BATTERY_WARNING_THRESHOLD = 35;
 
 // The mock adapter always seeds exactly these three day entries — this maps each entry's
 // language-neutral id to its translated display name (the adapter's own `name` field is mock
@@ -149,7 +151,7 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
     setRefreshing(false);
   }, [load]);
 
-  const showBatteryWarning = (summary?.batteryPercent ?? 100) < 35;
+  const showBatteryWarning = (summary?.batteryPercent ?? DEFAULT_BATTERY_PERCENT) < LOW_BATTERY_WARNING_THRESHOLD;
   const showGpsWarning = summary ? !summary.gpsAvailable : false;
   const banner = summary ? bannerForStatus(summary.crewStatus, home) : null;
 
