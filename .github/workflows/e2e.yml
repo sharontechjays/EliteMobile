@@ -7,6 +7,13 @@ on:
     branches: [dev]
   workflow_dispatch: {}
 
+# Without this, pushing several commits in quick succession queues one macOS runner per push
+# instead of superseding the stale one — each waits behind the last for the same limited runner
+# capacity, and the oldest can end up hitting timeout-minutes before it's even really failing.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   maestro:
     runs-on: macos-15
