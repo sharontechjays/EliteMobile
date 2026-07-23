@@ -174,6 +174,11 @@ export interface Translations {
     mealBreakStartedBody: string;
     mealBreakLoggedTitle: string;
     mealBreakLoggedBody: (value: string) => string;
+    mealReminderTitle: string;
+    mealReminderBody: string;
+    mealEscalationTitle: string;
+    mealEscalationBody: (memberName: string) => string;
+    mealAlertFallbackMemberName: string;
     attachmentsLabel: string;
     attachPhotoButton: string;
     attachVideoButton: string;
