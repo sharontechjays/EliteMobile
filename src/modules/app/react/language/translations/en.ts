@@ -16,6 +16,7 @@ export const en: Translations = {
     pending: (count) => `▲ ${count} pending`,
     notificationsA11yLabel: "Notifications",
     dayTimerA11yLabel: "Time since clock-in today",
+    syncUnknown: "◎ Sync unknown",
   },
 
   notifyOfficePanel: {

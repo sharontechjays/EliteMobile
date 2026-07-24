@@ -1,18 +1,14 @@
 import { useCallback, useState } from "react";
-import { ActionSheetIOS, Linking } from "react-native";
+import { ActionSheetIOS, Alert, Linking, Platform } from "react-native";
 import * as Crypto from "expo-crypto";
 import { useDependencies } from "@app/react/useDependencies";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { NOTES_MAX_PHOTOS } from "@/constants/appConstants";
+import { MediaItem } from "@/ui/utils/MediaItem.type";
 import { SaveNoteUseCase } from "../../core/usecases/SaveNote.usecase";
 
-interface PhotoTile {
+interface PhotoTile extends MediaItem {
   id: string;
-  kind: "photo" | "video";
-  uri: string;
-  width: number;
-  height: number;
-  thumbnailUri: string;
 }
 
 interface UseNotesViewModelArgs {
@@ -64,17 +60,27 @@ export const useNotesViewModel = ({ ticketName, onSaved }: UseNotesViewModelArgs
 
   const onAddPhoto = useCallback(() => {
     if (photos.length >= NOTES_MAX_PHOTOS) return;
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        title: t.addMediaTitle,
-        options: [t.takePhotoOption, t.recordVideoOption, strings.common.cancel],
-        cancelButtonIndex: 2,
-      },
-      (buttonIndex) => {
-        if (buttonIndex === 0) onCaptureMedia("photo");
-        else if (buttonIndex === 1) onCaptureMedia("video");
-      },
-    );
+    // ActionSheetIOS is iOS-only — Android gets the same two choices via a cross-platform Alert
+    // instead, rather than crashing/no-op-ing on a native module that doesn't exist there.
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: t.addMediaTitle,
+          options: [t.takePhotoOption, t.recordVideoOption, strings.common.cancel],
+          cancelButtonIndex: 2,
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) onCaptureMedia("photo");
+          else if (buttonIndex === 1) onCaptureMedia("video");
+        },
+      );
+      return;
+    }
+    Alert.alert(t.addMediaTitle, undefined, [
+      { text: t.takePhotoOption, onPress: () => onCaptureMedia("photo") },
+      { text: t.recordVideoOption, onPress: () => onCaptureMedia("video") },
+      { text: strings.common.cancel, style: "cancel" },
+    ]);
   }, [photos.length, t, strings.common.cancel, onCaptureMedia]);
 
   const onRemovePhoto = useCallback((id: string) => {
@@ -85,7 +91,7 @@ export const useNotesViewModel = ({ ticketName, onSaved }: UseNotesViewModelArgs
   const onClosePreview = useCallback(() => setPreviewMedia(null), []);
   const onDismissAttachmentError = useCallback(() => setAttachmentErrorMessage(null), []);
   const onOpenSettingsForPermission = useCallback(() => {
-    Linking.openSettings();
+    Linking.openSettings().catch((error) => console.warn("Linking.openSettings failed", error));
     setAttachmentErrorMessage(null);
   }, []);
 

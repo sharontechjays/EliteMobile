@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useDependencies } from "@app/react/useDependencies";
 import { useMealReminders } from "@app/react/mealReminders/useMealReminders";
@@ -20,6 +20,10 @@ export const useAttestationViewModel = ({ queue, onDone }: UseAttestationViewMod
   const [confirming, setConfirming] = useState(false);
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState(false);
+  // React state updates aren't synchronous — a double-tap before the `confirming` state's
+  // re-render lands could read the old `false` value twice and submit the same worker's
+  // attestation twice. This ref is set/cleared synchronously around the async work instead.
+  const confirmingRef = useRef(false);
 
   const current = queue[index] ?? null;
 
@@ -29,9 +33,7 @@ export const useAttestationViewModel = ({ queue, onDone }: UseAttestationViewMod
   }, []);
 
   const onConfirm = useCallback(async () => {
-    // confirming guards against a double-tap re-submitting the same worker's attestation while
-    // the async punchRecorder call from a previous tap is still in flight.
-    if (!current || confirming) return;
+    if (!current || confirmingRef.current) return;
     if (code.length < ATTESTATION_MIN_CODE_LENGTH) return;
 
     if (code !== current.employeeCode) {
@@ -40,32 +42,36 @@ export const useAttestationViewModel = ({ queue, onDone }: UseAttestationViewMod
       return;
     }
 
+    confirmingRef.current = true;
     setConfirming(true);
-    const usecase = new ConfirmAttestationUseCase(punchRecorder, workerStatusRecorder);
-    await usecase.execute(current.id, current.direction);
-    setConfirming(false);
+    try {
+      const usecase = new ConfirmAttestationUseCase(punchRecorder, workerStatusRecorder);
+      await usecase.execute(current.id, current.direction);
 
-    // Clocking IN starts this worker's meal-reminder cascade (see MealReminderProvider);
-    // clocking OUT stops and clears it so a later clock-in restarts fresh.
-    if (current.direction === "IN") startReminder(current.id, current.name);
-    else stopReminder(current.id);
+      // Clocking IN starts this worker's meal-reminder cascade (see MealReminderProvider);
+      // clocking OUT stops and clears it so a later clock-in restarts fresh.
+      if (current.direction === "IN") startReminder(current.id, current.name);
+      else stopReminder(current.id);
 
-    // The app-wide "day timer" (TopBar, every screen) starts on the day's first IN punch —
-    // timer.start() is a no-op if it's already running, so later punches (this worker or any
-    // other) never restart it, and it keeps ticking regardless of individual clock-outs.
-    if (current.direction === "IN") timer.start(DAY_TIMER_ID);
+      // The app-wide "day timer" (TopBar, every screen) starts on the day's first IN punch —
+      // timer.start() is a no-op if it's already running, so later punches (this worker or any
+      // other) never restart it, and it keeps ticking regardless of individual clock-outs.
+      if (current.direction === "IN") timer.start(DAY_TIMER_ID);
 
-    setCode("");
-    setCodeError(false);
+      setCode("");
+      setCodeError(false);
 
-    if (index + 1 >= queue.length) {
-      onDone();
-      return;
+      if (index + 1 >= queue.length) {
+        onDone();
+        return;
+      }
+      setIndex(index + 1);
+    } finally {
+      confirmingRef.current = false;
+      setConfirming(false);
     }
-    setIndex(index + 1);
   }, [
     current,
-    confirming,
     code,
     punchRecorder,
     workerStatusRecorder,

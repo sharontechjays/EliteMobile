@@ -161,12 +161,14 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   useEffect(() => {
     let cancelled = false;
     new GetTicketAttachmentsUseCase(ticketAttachmentsStore).execute(ticketId).then((result) => {
-      if (!cancelled && result.success) setAttachments(result.data);
+      if (cancelled) return;
+      if (result.success) setAttachments(result.data);
+      else setAttachmentErrorMessage(t.attachmentErrorGeneric);
     });
     return () => {
       cancelled = true;
     };
-  }, [ticketId, ticketAttachmentsStore]);
+  }, [ticketId, ticketAttachmentsStore, t]);
 
   useEffect(() => {
     if (!ticket?.nextTicketId) {
@@ -317,6 +319,10 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
 
       if (result.success) {
         setAttachments((current) => [...current, result.data]);
+        // A later successful capture clears any stale error banner left over from an earlier
+        // failed attempt — it would otherwise linger displayed indefinitely.
+        setAttachmentErrorMessage(null);
+        setAttachmentErrorIsPermission(false);
         return;
       }
       if (result.error.type === "CANCELLED") return;

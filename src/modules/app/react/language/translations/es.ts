@@ -31,6 +31,7 @@ export const es: Translations = {
     pending: (count) => `▲ ${count} pendiente(s)`,
     notificationsA11yLabel: "Notificaciones",
     dayTimerA11yLabel: "Tiempo desde la entrada de hoy",
+    syncUnknown: "◎ Sincronización desconocida",
   },
 
   notifyOfficePanel: {

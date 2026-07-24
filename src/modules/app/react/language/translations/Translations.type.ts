@@ -21,6 +21,7 @@ export interface Translations {
     pending: (count: number) => string;
     notificationsA11yLabel: string;
     dayTimerA11yLabel: string;
+    syncUnknown: string;
   };
 
   notifyOfficePanel: {

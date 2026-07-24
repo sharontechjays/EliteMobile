@@ -44,12 +44,22 @@ export function TopBar({ showSyncPill = true }: TopBarProps) {
   // brief window (until the effect below resolves) where a genuinely pending queue is
   // momentarily shown as synced.
   const [status, setStatus] = useState<SyncStatus>(SYNCED_STATUS);
+  // Separate from `status` so a failed read doesn't fall back to silently claiming "Synced" —
+  // status keeps its optimistic default for the brief loading window, but a genuine failure is
+  // surfaced distinctly instead of being indistinguishable from success.
+  const [syncCheckFailed, setSyncCheckFailed] = useState(false);
   const [, forceRerender] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     new GetSyncQueueUseCase(syncQueueReader).execute().then((result) => {
-      if (!cancelled && result.success) setStatus(deriveSyncStatus(result.data));
+      if (cancelled) return;
+      if (result.success) {
+        setStatus(deriveSyncStatus(result.data));
+        setSyncCheckFailed(false);
+      } else {
+        setSyncCheckFailed(true);
+      }
     });
     return () => {
       cancelled = true;
@@ -74,14 +84,20 @@ export function TopBar({ showSyncPill = true }: TopBarProps) {
         {showSyncPill ? (
           <Pressable onPress={() => router.push("/sync-queue")}>
             <View style={styles.syncPill}>
-              <View style={[styles.dot, { backgroundColor: pending ? colors.idle : colors.job }]} />
+              {!syncCheckFailed && (
+                <View style={[styles.dot, { backgroundColor: pending ? colors.idle : colors.job }]} />
+              )}
               <Text
                 style={[
                   typography.caption,
                   { fontFamily: fontMono, fontSize: 12.5, color: pending ? colors.idle : colors.dim },
                 ]}
               >
-                {pending ? strings.topBar.pending(pendingTotal) : strings.topBar.synced}
+                {syncCheckFailed
+                  ? strings.topBar.syncUnknown
+                  : pending
+                    ? strings.topBar.pending(pendingTotal)
+                    : strings.topBar.synced}
               </Text>
             </View>
           </Pressable>

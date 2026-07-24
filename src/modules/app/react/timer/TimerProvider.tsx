@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useReducer, useRef } from "react";
 import { useDependencies } from "@app/react/useDependencies";
 import { MS_PER_SECOND, TIMER_TICK_INTERVAL_MS } from "@/constants/appConstants";
-import { initialTimersState, timerReducer, TimersState } from "./timerReducer";
+import { initialTimersState, timerReducer, TimerEntryState, TimersState } from "./timerReducer";
 
 export interface TimerContextValue {
   getSeconds(id: string): number;
@@ -15,15 +15,31 @@ export const TimerContext = createContext<TimerContextValue | null>(null);
 
 const STORAGE_KEY = "timers.v1";
 
+function isValidEntry(value: unknown): value is TimerEntryState {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as Partial<TimerEntryState>;
+  return (
+    typeof entry.accumulatedSeconds === "number" && (entry.startedAt === null || typeof entry.startedAt === "number")
+  );
+}
+
+function isValidTimersState(value: unknown): value is TimersState {
+  if (!value || typeof value !== "object") return false;
+  const entries = (value as Partial<TimersState>).entries;
+  if (!entries || typeof entries !== "object") return false;
+  return Object.values(entries).every(isValidEntry);
+}
+
 function loadPersisted(getString: (key: string) => string | null): TimersState {
   const raw = getString(STORAGE_KEY);
   if (!raw) return initialTimersState;
   try {
-    return JSON.parse(raw) as TimersState;
+    const parsed: unknown = JSON.parse(raw);
+    // A corrupted/unparseable/malformed-shape persisted blob resets all timers to initial state
+    // rather than crashing app startup — silently losing in-progress timer state is an acceptable
+    // trade-off against the app failing to launch at all, or crashing later on a bad entry.
+    return isValidTimersState(parsed) ? parsed : initialTimersState;
   } catch {
-    // A corrupted/unparseable persisted blob resets all timers to initial state rather than
-    // crashing app startup — silently losing in-progress timer state is an acceptable trade-off
-    // against the app failing to launch at all.
     return initialTimersState;
   }
 }

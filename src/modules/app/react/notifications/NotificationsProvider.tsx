@@ -37,10 +37,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     idCounter.current += 1;
     const full: NotifLogEntry = { ...entry, id: `notif-${idCounter.current}`, createdAt: Date.now() };
     dispatch({ type: "PUSH", entry: full });
+    // The in-app log above already updated regardless — a native scheduling failure (e.g.
+    // invalid content, OS-level rejection) shouldn't surface as an unhandled promise rejection.
     Notifications.scheduleNotificationAsync({
       content: { title: `${entry.icon} ${entry.title}`, body: entry.body, sound: "default" },
       trigger: null,
-    });
+    }).catch((error) => console.warn("scheduleNotificationAsync failed", error));
   }, []);
 
   return <NotificationsContext.Provider value={{ log: state.log, push }}>{children}</NotificationsContext.Provider>;
