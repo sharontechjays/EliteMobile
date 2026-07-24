@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useReducer, useRef } from "react";
 import { useDependencies } from "@app/react/useDependencies";
-import { initialTimersState, MS_PER_SECOND, timerReducer, TimersState } from "./timerReducer";
+import { MS_PER_SECOND, TIMER_TICK_INTERVAL_MS } from "@/constants/appConstants";
+import { initialTimersState, timerReducer, TimersState } from "./timerReducer";
 
 export interface TimerContextValue {
   getSeconds(id: string): number;
@@ -13,7 +14,6 @@ export interface TimerContextValue {
 export const TimerContext = createContext<TimerContextValue | null>(null);
 
 const STORAGE_KEY = "timers.v1";
-const TICK_INTERVAL_MS = 1000;
 
 function loadPersisted(getString: (key: string) => string | null): TimersState {
   const raw = getString(STORAGE_KEY);
@@ -21,6 +21,9 @@ function loadPersisted(getString: (key: string) => string | null): TimersState {
   try {
     return JSON.parse(raw) as TimersState;
   } catch {
+    // A corrupted/unparseable persisted blob resets all timers to initial state rather than
+    // crashing app startup — silently losing in-progress timer state is an acceptable trade-off
+    // against the app failing to launch at all.
     return initialTimersState;
   }
 }
@@ -49,10 +52,14 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   // getSeconds/isRunning correctness.
   const [, bump] = useReducer((c: number) => c + 1, 0);
   useEffect(() => {
-    const interval = setInterval(bump, TICK_INTERVAL_MS);
+    const interval = setInterval(bump, TIMER_TICK_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
 
+  // Built once via useRef (not recreated each render) and its methods close over stateRef rather
+  // than state directly — this keeps the context value's identity stable across every tick/bump,
+  // so consumers reading it via useContext don't re-render just because the provider did, while
+  // still reading fresh data on each call through stateRef.current.
   const value = useRef<TimerContextValue>({
     getSeconds: (id) => {
       const entry = stateRef.current.entries[id];

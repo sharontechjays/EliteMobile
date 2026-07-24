@@ -53,6 +53,8 @@ export const es: Translations = {
     tagline: "Registro de tiempo y trabajos en campo",
     loading: "Cargando el trabajo de hoy…",
     lastSync: (label) => `Última sincronización: ${label} · Idioma definido por el perfil del empleado`,
+    checkingSync: "Comprobando última sincronización…",
+    notYetSynced: "Aún no sincronizado",
     continueButton: "Continuar",
   },
 
@@ -187,6 +189,20 @@ export const es: Translations = {
     mealBreakStartedBody: "El tiempo de trabajo está en pausa hasta que termine el descanso.",
     mealBreakLoggedTitle: "Descanso registrado",
     mealBreakLoggedBody: (value) => `${value} registrado.`,
+    mealReminderTitle: "◔ Recordatorio de descanso para comer",
+    mealReminderBody: "Toma tu descanso para comer antes de tu quinta hora.",
+    mealEscalationTitle: "▲ Descanso para comer vencido",
+    mealEscalationBody: (memberName) => `${memberName} no ha tomado su descanso para comer.`,
+    mealAlertFallbackMemberName: "Este miembro de la cuadrilla",
+    attachmentsLabel: "Fotos y videos",
+    attachPhotoButton: "Foto",
+    attachVideoButton: "Video",
+    attachmentErrorNoActiveTicket: "Abre un trabajo antes de adjuntar contenido multimedia.",
+    attachmentErrorPermissionDenied:
+      "El acceso a la cámara está desactivado para Elite Mobile — actívalo en Ajustes para adjuntar contenido multimedia.",
+    attachmentErrorGeneric: "No se pudo adjuntar ese contenido. Inténtalo de nuevo.",
+    attachmentErrorOpenSettingsButton: "Abrir Ajustes",
+    mediaPreviewCloseButton: "Cerrar",
   },
 
   ticketsList: {
@@ -233,13 +249,19 @@ export const es: Translations = {
   notes: {
     headerLabel: "Notas y fotos",
     ticketLabel: (ticketName) => `Orden: ${ticketName}`,
-    photoLabel: "foto",
-    videoLabel: "video",
     extraWorkLabel: "Marcar como trabajo EXTRA",
     extraWorkHint: "Se envía al supervisor para revisión de la orden de trabajo",
     notesPlaceholder: "Agregar una nota…",
     savingButton: "Guardando…",
     saveQueuedButton: "Guardar (en cola)",
+    addMediaTitle: "Agregar contenido multimedia",
+    takePhotoOption: "Tomar foto",
+    recordVideoOption: "Grabar video",
+    attachmentErrorPermissionDenied:
+      "El acceso a la cámara está desactivado para Elite Mobile — actívalo en Ajustes para adjuntar contenido multimedia.",
+    attachmentErrorGeneric: "No se pudo adjuntar ese contenido. Inténtalo de nuevo.",
+    attachmentErrorOpenSettingsButton: "Abrir Ajustes",
+    mediaPreviewCloseButton: "Cerrar",
   },
 
   syncQueue: {

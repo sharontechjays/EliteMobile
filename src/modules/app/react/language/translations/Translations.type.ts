@@ -43,6 +43,8 @@ export interface Translations {
     tagline: string;
     loading: string;
     lastSync: (label: string) => string;
+    checkingSync: string;
+    notYetSynced: string;
     continueButton: string;
   };
 
@@ -172,6 +174,19 @@ export interface Translations {
     mealBreakStartedBody: string;
     mealBreakLoggedTitle: string;
     mealBreakLoggedBody: (value: string) => string;
+    mealReminderTitle: string;
+    mealReminderBody: string;
+    mealEscalationTitle: string;
+    mealEscalationBody: (memberName: string) => string;
+    mealAlertFallbackMemberName: string;
+    attachmentsLabel: string;
+    attachPhotoButton: string;
+    attachVideoButton: string;
+    attachmentErrorNoActiveTicket: string;
+    attachmentErrorPermissionDenied: string;
+    attachmentErrorGeneric: string;
+    attachmentErrorOpenSettingsButton: string;
+    mediaPreviewCloseButton: string;
   };
 
   ticketsList: {
@@ -217,13 +232,18 @@ export interface Translations {
   notes: {
     headerLabel: string;
     ticketLabel: (ticketName: string) => string;
-    photoLabel: string;
-    videoLabel: string;
     extraWorkLabel: string;
     extraWorkHint: string;
     notesPlaceholder: string;
     savingButton: string;
     saveQueuedButton: string;
+    addMediaTitle: string;
+    takePhotoOption: string;
+    recordVideoOption: string;
+    attachmentErrorPermissionDenied: string;
+    attachmentErrorGeneric: string;
+    attachmentErrorOpenSettingsButton: string;
+    mediaPreviewCloseButton: string;
   };
 
   syncQueue: {

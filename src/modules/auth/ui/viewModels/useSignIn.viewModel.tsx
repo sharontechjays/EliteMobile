@@ -1,10 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { useDependencies } from "@app/react/useDependencies";
+import { SIGN_IN_CODE_LENGTH, SIGN_IN_ERROR_DISPLAY_MS } from "@/constants/appConstants";
 import { SignInUseCase } from "../../core/usecases/SignIn.usecase";
 import { CrewLeaderSession } from "../../core/entities/CrewLeaderSession.entity";
 
-const CODE_LENGTH = 5;
-const ERROR_DISPLAY_MS = 350;
 export const SESSION_EMPLOYEE_CODE_KEY = "session.employeeCode";
 
 interface UseSignInViewModelArgs {
@@ -17,6 +16,9 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
   const [hasError, setHasError] = useState(false);
   const submitting = useRef(false);
 
+  // A ref rather than state: submit() is called from onKeyPress synchronously on "✓", and a
+  // second fast tap could fire before the first render/state-update from setHasError=false
+  // cycles through — a ref reads/writes immediately without waiting on a render, closing that gap.
   const submit = useCallback(
     async (fullCode: string) => {
       if (submitting.current) return;
@@ -38,13 +40,16 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
       setTimeout(() => {
         setHasError(false);
         setCode("");
-      }, ERROR_DISPLAY_MS);
+      }, SIGN_IN_ERROR_DISPLAY_MS);
     },
     [sessionAuthenticator, keyValueStore, onSignedIn],
   );
 
   const onKeyPress = useCallback(
     (key: string) => {
+      // Freeze the keypad for the duration of the error/shake state — otherwise a worker who
+      // keeps tapping after a wrong code would build up a new code underneath the error display,
+      // which then gets silently wiped by submit()'s own setCode("") once the timeout fires.
       if (hasError) return;
 
       if (key === "⌫") {
@@ -53,17 +58,17 @@ export const useSignInViewModel = ({ onSignedIn }: UseSignInViewModelArgs) => {
       }
 
       if (key === "✓") {
-        if (code.length === CODE_LENGTH) submit(code);
+        if (code.length === SIGN_IN_CODE_LENGTH) submit(code);
         return;
       }
 
-      setCode((prev) => (prev.length >= CODE_LENGTH ? prev : prev + key));
+      setCode((prev) => (prev.length >= SIGN_IN_CODE_LENGTH ? prev : prev + key));
     },
     [hasError, code, submit],
   );
 
   return {
-    state: { code, codeLength: CODE_LENGTH, hasError },
+    state: { code, codeLength: SIGN_IN_CODE_LENGTH, hasError },
     handlers: { onKeyPress },
   };
 };

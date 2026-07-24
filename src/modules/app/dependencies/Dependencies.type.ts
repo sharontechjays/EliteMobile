@@ -8,9 +8,12 @@ import { RosterReader } from "@modules/roster/core/ports/RosterReader.port";
 import { PunchRecorder } from "@modules/clock/core/ports/PunchRecorder.port";
 import { NoteSaver } from "@modules/notes/core/ports/NoteSaver.port";
 import { TicketsReader } from "@modules/tickets/core/ports/TicketsReader.port";
+import { MediaCapture } from "@modules/tickets/core/ports/MediaCapture.port";
+import { TicketAttachmentsStore } from "@modules/tickets/core/ports/TicketAttachmentsStore.port";
 import { TimesheetReader } from "@modules/timesheet/core/ports/TimesheetReader.port";
 import { SyncQueueReader } from "@modules/sync/core/ports/SyncQueueReader.port";
 import { ProfileReader } from "@modules/profile/core/ports/ProfileReader.port";
+import { ExampleNotesApi } from "@modules/apiIntegrationExample/core/ports/ExampleNotesApi.port";
 
 export interface Dependencies {
   keyValueStore: KeyValueStore;
@@ -23,7 +26,10 @@ export interface Dependencies {
   punchRecorder: PunchRecorder;
   noteSaver: NoteSaver;
   ticketsReader: TicketsReader;
+  mediaCapture: MediaCapture;
+  ticketAttachmentsStore: TicketAttachmentsStore;
   timesheetReader: TimesheetReader;
   syncQueueReader: SyncQueueReader;
   profileReader: ProfileReader;
+  exampleNotesApi: ExampleNotesApi;
 }

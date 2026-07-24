@@ -1,3 +1,5 @@
+import { MAX_NOTIF_LOG } from "@/constants/appConstants";
+
 export interface NotifLogEntry {
   id: string;
   icon: string;
@@ -11,8 +13,6 @@ export interface NotificationsState {
 }
 
 export type NotificationsAction = { type: "PUSH"; entry: NotifLogEntry };
-
-export const MAX_NOTIF_LOG = 6;
 
 export const initialNotificationsState: NotificationsState = { log: [] };
 

@@ -1,4 +1,4 @@
-import { deriveSyncStatus } from "./deriveSyncStatus";
+import { deriveSyncStatus } from "./deriveSyncStatus.usecase";
 import { SyncQueueItem } from "../entities/SyncQueueItem.entity";
 
 const queued = (id: string): SyncQueueItem => ({

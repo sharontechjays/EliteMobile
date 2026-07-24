@@ -42,9 +42,11 @@ approval and session state persist via the real MMKV-backed storage.
 ## Creating new test cases
 
 1. **Explore the screen with Maestro Studio** before writing anything:
+
    ```bash
    maestro studio
    ```
+
    This opens an interactive inspector against whatever device/simulator has the app running.
    Tap around the real screen and it shows you the exact accessibility text or `testID` Maestro
    sees for each element — the fastest way to get selectors right on the first try instead of
@@ -52,23 +54,27 @@ approval and session state persist via the real MMKV-backed storage.
 
 2. **Create a new file** at `.maestro/flows/NN-short-description.yaml`, next number in sequence
    after the existing ones. Every flow starts the same way:
+
    ```yaml
    appId: com.eliteteams.mobile
    ---
    - launchApp:
-       clearState: false   # true only if this flow needs a guaranteed-fresh install
+       clearState: false # true only if this flow needs a guaranteed-fresh install
    ```
 
 3. **Reach the screen you're testing.** Prefer a deep link over tapping through the tab bar:
+
    ```yaml
    - openLink: "elitemobile://<route>"
    ```
+
    Available routes (from `app.config.ts`'s `scheme: "elitemobile"` + the `app/` route files):
    `home`, `roster`, `tickets`, `timesheet`, `attestation`, `device-registration`, `notes`,
    `profile`, `sign-in`, `sync-queue`, `ticket-detail`, `travel`, `api-integration-example`.
 
 4. **Write the steps and assertions**, using the commands below, then run just that file
    repeatedly while iterating:
+
    ```bash
    maestro test .maestro/flows/NN-your-flow.yaml
    ```
@@ -77,20 +83,20 @@ approval and session state persist via the real MMKV-backed storage.
    useful for a human to spot-check visually later without re-running the flow.
 
 6. **Document it** — add a one-line entry to the Flows list below, matching the existing style
-   (what it exercises, anything it deliberately does *not* cover and why).
+   (what it exercises, anything it deliberately does _not_ cover and why).
 
 ### Commands you'll actually use in this app
 
-| Command | Use for |
-|---|---|
-| `tapOn: "Label"` / `tapOn: ".*regex.*"` | Tap by visible text (exact match unless you write a regex) |
-| `tapOn: { id: "testID-value" }` | Tap by `testID` prop — use for anything a text match can't hit reliably (switches, icon-only buttons) |
-| `assertVisible` / `assertNotVisible` | Verify state after an action |
-| `extendedWaitUntil: { visible: "...", timeout: 10000 }` | Wait for async state (network mock delay, animation) instead of a flaky fixed `tapOn` |
-| `openLink: "elitemobile://<route>"` | Jump straight to a screen, bypassing tab-bar navigation |
-| `inputText` / `hideKeyboard` | Text fields |
-| `takeScreenshot: "name"` | Visual checkpoint, lands in cwd |
-| `runFlow: other-flow.yaml` | Compose a shared setup sequence across multiple flows |
+| Command                                                 | Use for                                                                                               |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `tapOn: "Label"` / `tapOn: ".*regex.*"`                 | Tap by visible text (exact match unless you write a regex)                                            |
+| `tapOn: { id: "testID-value" }`                         | Tap by `testID` prop — use for anything a text match can't hit reliably (switches, icon-only buttons) |
+| `assertVisible` / `assertNotVisible`                    | Verify state after an action                                                                          |
+| `extendedWaitUntil: { visible: "...", timeout: 10000 }` | Wait for async state (network mock delay, animation) instead of a flaky fixed `tapOn`                 |
+| `openLink: "elitemobile://<route>"`                     | Jump straight to a screen, bypassing tab-bar navigation                                               |
+| `inputText` / `hideKeyboard`                            | Text fields                                                                                           |
+| `takeScreenshot: "name"`                                | Visual checkpoint, lands in cwd                                                                       |
+| `runFlow: other-flow.yaml`                              | Compose a shared setup sequence across multiple flows                                                 |
 
 ## Automating test cases (CI)
 
@@ -105,6 +111,7 @@ on every push/PR to `main`, plus on manual dispatch:
   screen actually looked like without re-running locally.
 
 To run the same thing locally exactly as CI does:
+
 ```bash
 npm ci
 cd ios && pod install && cd ..

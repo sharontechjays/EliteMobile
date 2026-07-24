@@ -6,6 +6,9 @@ import { DeviceIdentityKeyPair, DeviceIdentityKeyStore } from "../../core/ports/
 // never exposed to JavaScript — only the public key and a hardware-backed flag cross the bridge.
 export class NativeDeviceIdentityKeyStoreAdapter implements DeviceIdentityKeyStore {
   async getOrCreateKeyPair(): Promise<DeviceIdentityKeyPair> {
+    // The native module exposes hasKeyPair/getPublicKey/generateKeyPair as three separate calls
+    // rather than one idempotent "getOrCreate" — this check-then-act on the JS side is what makes
+    // this adapter's own getOrCreateKeyPair() name actually true.
     const publicKey = DeviceIdentityModule.hasKeyPair()
       ? await DeviceIdentityModule.getPublicKey()
       : await DeviceIdentityModule.generateKeyPair();

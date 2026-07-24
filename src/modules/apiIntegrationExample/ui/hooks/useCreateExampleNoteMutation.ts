@@ -1,9 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { HttpExampleNotesAdapter } from "../../infrastructure/adapters/HttpExampleNotes.adapter";
+import { useDependencies } from "@app/react/useDependencies";
 import { NewExampleNote } from "../../core/entities/ExampleNote.entity";
 import { exampleNotesQueryKey } from "./useExampleNotesQuery";
-
-const api = new HttpExampleNotesAdapter();
 
 // A write, offline-queued: React Query's mutation `networkMode` defaults to "online" (see
 // queryClient.ts's own note), so calling `mutate()` with no connection doesn't fail — it goes
@@ -13,11 +11,12 @@ const api = new HttpExampleNotesAdapter();
 // callback in app/_layout.tsx calls queryClient.resumePausedMutations() on the next launch so a
 // queued note isn't silently lost.
 export function useCreateExampleNoteMutation() {
+  const { exampleNotesApi } = useDependencies();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (note: NewExampleNote) => {
-      const result = await api.create(note);
+      const result = await exampleNotesApi.create(note);
       if (!result.success) throw new Error(result.error.type);
       return result.data;
     },
