@@ -104,6 +104,10 @@ export const MMKV_ENCRYPTION_KEY_BYTE_COUNT = 24;
 
 // --- Media thumbnail ---
 export const THUMBNAIL_SIZE = 64;
+// NotesScreen's photo grid tile — a couple px larger than the thumbnail itself so the
+// overlaid remove button (positioned top:3/right:3) has room without clipping the image
+// underneath. Derived from THUMBNAIL_SIZE so the two can't silently drift apart.
+export const MEDIA_TILE_SIZE = THUMBNAIL_SIZE + 2;
 
 // --- Bell icon ---
 export const BELL_ICON_VIEWBOX_WIDTH = 13;

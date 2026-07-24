@@ -9,6 +9,7 @@ import { MediaPreviewModal } from "@/ui/components/organisms/MediaPreviewModal";
 import { colors } from "@/ui/theme/colors";
 import { typography } from "@/ui/theme/typography";
 import { SCREEN_TOP_INSET_DIRECT } from "@/ui/theme/layout";
+import { MEDIA_TILE_SIZE } from "@/constants/appConstants";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { useNotesViewModel } from "../viewModels/useNotes.viewModel";
 
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   removeButtonText: { fontSize: 9, fontWeight: "700", color: colors.paper },
-  mediaTileWrapper: { width: 66, height: 66 },
+  mediaTileWrapper: { width: MEDIA_TILE_SIZE, height: MEDIA_TILE_SIZE },
   attachmentErrorBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -147,8 +148,8 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   addPhotoTile: {
-    width: 66,
-    height: 66,
+    width: MEDIA_TILE_SIZE,
+    height: MEDIA_TILE_SIZE,
     borderRadius: 10,
     backgroundColor: colors.sunk,
     borderWidth: 1,

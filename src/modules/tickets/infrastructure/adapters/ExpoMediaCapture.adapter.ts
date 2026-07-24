@@ -29,6 +29,10 @@ export class ExpoMediaCaptureAdapter implements MediaCapture {
   // thumbnail/grid display. Falls back to the video uri itself if generation fails — the
   // thumbnail grid just won't render an image for that tile, which is better than failing the
   // whole capture over a thumbnail that's cosmetic.
+  //
+  // expo-video-thumbnails has no deprecation date yet, but expo-video's own generateThumbnailsAsync
+  // is the SDK's forward-looking replacement — it needs an active VideoPlayer instance rather than
+  // a standalone uri-in/uri-out call, so migrating isn't a drop-in swap. Revisit before Expo SDK 56.
   private async generateVideoThumbnail(videoUri: string): Promise<string> {
     try {
       const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri);
