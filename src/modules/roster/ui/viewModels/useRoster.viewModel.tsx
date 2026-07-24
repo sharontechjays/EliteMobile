@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDependencies } from "@app/react/useDependencies";
 import { useNotifications } from "@app/react/notifications/useNotifications";
 import { useLanguage } from "@app/react/language/useLanguage";
@@ -51,21 +51,22 @@ export const useRosterViewModel = () => {
     off: mock.rosterWorkerStatusOff,
   };
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([
+  // Exposed as handlers.refetch below so the route can re-run it via expo-router's
+  // useFocusEffect — the roster tab isn't unmounted/remounted on tab switch (see
+  // RosterScreen.tsx's own comment), so a mount-only effect would never pick up a status change
+  // made elsewhere (e.g. a punch confirmed on the attestation screen).
+  const load = useCallback(async () => {
+    const [rosterResult, directoryResult] = await Promise.all([
       new GetCrewRosterUseCase(rosterReader).execute(),
       new GetDirectoryUseCase(rosterReader).execute(),
-    ]).then(([rosterResult, directoryResult]) => {
-      if (cancelled) return;
-      if (rosterResult.success) setWorkers(rosterResult.data);
-      if (directoryResult.success) setDirectory(directoryResult.data);
-    });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    ]);
+    if (rosterResult.success) setWorkers(rosterResult.data);
+    if (directoryResult.success) setDirectory(directoryResult.data);
+  }, [rosterReader]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   // Reads whichever selected worker .find() happens to return first — safe only because
   // toggleWorker below refuses to let a worker of a different direction join the selection in the
@@ -179,6 +180,7 @@ export const useRosterViewModel = () => {
       requestResults,
     },
     handlers: {
+      refetch: load,
       onToggleWorker: toggleWorker,
       onToggleRequest: () => setRequestOpen((prev) => !prev),
       onChangeRequestQuery: setRequestQuery,

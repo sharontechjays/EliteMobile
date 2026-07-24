@@ -1,6 +1,10 @@
 import React from "react";
 import { renderHook, act } from "@testing-library/react-native";
 import { DependenciesProvider } from "@app/react/DependenciesProvider";
+import { LanguageProvider } from "@app/react/language/LanguageProvider";
+import { TimerProvider } from "@app/react/timer/TimerProvider";
+import { NotificationsProvider } from "@app/react/notifications/NotificationsProvider";
+import { MealReminderProvider } from "@app/react/mealReminders/MealReminderProvider";
 import { Dependencies } from "@app/dependencies/Dependencies.type";
 import { ok } from "@/types/Result";
 import { useAttestationViewModel } from "./useAttestation.viewModel";
@@ -12,14 +16,36 @@ const QUEUE: AttestationWorker[] = [
   { id: "brent-m" as WorkerId, name: "Brent M.", initials: "BM", direction: "OUT", employeeCode: "7734" },
 ];
 
+class FakeKeyValueStore {
+  private map = new Map<string, string>();
+  getString(key: string) {
+    return this.map.get(key) ?? null;
+  }
+  setString(key: string, value: string) {
+    this.map.set(key, value);
+  }
+}
+
 function buildTestDeps(): Dependencies {
   return {
+    keyValueStore: new FakeKeyValueStore(),
     punchRecorder: { recordPunch: async () => ok(undefined) },
+    workerStatusRecorder: { applyPunch: async () => ok(undefined) },
   } as unknown as Dependencies;
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {
-  return <DependenciesProvider dependencies={buildTestDeps()}>{children}</DependenciesProvider>;
+  return (
+    <DependenciesProvider dependencies={buildTestDeps()}>
+      <LanguageProvider>
+        <TimerProvider>
+          <NotificationsProvider>
+            <MealReminderProvider>{children}</MealReminderProvider>
+          </NotificationsProvider>
+        </TimerProvider>
+      </LanguageProvider>
+    </DependenciesProvider>
+  );
 }
 
 describe("useAttestationViewModel — employee code verification", () => {

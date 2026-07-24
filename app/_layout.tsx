@@ -10,6 +10,7 @@ import { buildDevDependencies } from "@app/dependencies/dependencies.dev";
 import { LanguageProvider } from "@app/react/language/LanguageProvider";
 import { TimerProvider } from "@app/react/timer/TimerProvider";
 import { NotificationsProvider } from "@app/react/notifications/NotificationsProvider";
+import { MealReminderProvider } from "@app/react/mealReminders/MealReminderProvider";
 import { TopBar } from "@/ui/components/organisms/TopBar";
 import { createQueryClient } from "@app/react/queryClient/queryClient";
 import { setupOnlineManager } from "@app/react/queryClient/setupOnlineManager";
@@ -69,8 +70,10 @@ export default function RootLayout() {
             <LanguageProvider>
               <TimerProvider>
                 <NotificationsProvider>
-                  <StatusBar style="dark" />
-                  <GlobalChrome />
+                  <MealReminderProvider>
+                    <StatusBar style="dark" />
+                    <GlobalChrome />
+                  </MealReminderProvider>
                 </NotificationsProvider>
               </TimerProvider>
             </LanguageProvider>

@@ -17,10 +17,10 @@ export class InMemoryHomeSummaryAdapter implements HomeSummaryReader {
   async today(): Promise<Result<HomeSummary, { type: "READ_FAILED" }>> {
     return ok({
       dateLabel: "Tue Jun 23",
-      crewLeaderLine: "H. Jackson · Chesterfield",
+      crewLeaderName: "H. Jackson",
+      crewLeaderRole: "crewLeader",
+      branch: "Chesterfield",
       crewLeaderInitials: "HJ",
-      batteryPercent: 62,
-      gpsAvailable: true,
       crewStatus: "out",
       nextJob: {
         id: "chesterfield-remodel",

@@ -16,7 +16,7 @@ Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
     shouldShowList: true,
-    shouldPlaySound: false,
+    shouldPlaySound: true,
     shouldSetBadge: false,
   }),
 });
@@ -38,7 +38,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     const full: NotifLogEntry = { ...entry, id: `notif-${idCounter.current}`, createdAt: Date.now() };
     dispatch({ type: "PUSH", entry: full });
     Notifications.scheduleNotificationAsync({
-      content: { title: `${entry.icon} ${entry.title}`, body: entry.body },
+      content: { title: `${entry.icon} ${entry.title}`, body: entry.body, sound: "default" },
       trigger: null,
     });
   }, []);

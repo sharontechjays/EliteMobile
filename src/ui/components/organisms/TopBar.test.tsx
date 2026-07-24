@@ -2,6 +2,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import { DependenciesProvider } from "@app/react/DependenciesProvider";
 import { LanguageProvider } from "@app/react/language/LanguageProvider";
+import { TimerProvider } from "@app/react/timer/TimerProvider";
 import { NotificationsProvider } from "@app/react/notifications/NotificationsProvider";
 import { Dependencies } from "@app/dependencies/Dependencies.type";
 import { Result, ok } from "@/types/Result";
@@ -31,9 +32,11 @@ function renderTopBar(queueItems: SyncQueueItem[], props: React.ComponentProps<t
   return render(
     <DependenciesProvider dependencies={buildTestDeps(queueItems)}>
       <LanguageProvider>
-        <NotificationsProvider>
-          <TopBar {...props} />
-        </NotificationsProvider>
+        <TimerProvider>
+          <NotificationsProvider>
+            <TopBar {...props} />
+          </NotificationsProvider>
+        </TimerProvider>
       </LanguageProvider>
     </DependenciesProvider>,
   );

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useDependencies } from "@app/react/useDependencies";
 import { useTimer } from "@app/react/timer/useTimer";
 import { useNotifications } from "@app/react/notifications/useNotifications";
+import { useMealReminders } from "@app/react/mealReminders/useMealReminders";
+import { useIsOnline } from "@app/react/queryClient/useIsOnline";
 import { useLanguage } from "@app/react/language/useLanguage";
 import { Translations } from "@app/react/language/translations/Translations.type";
 import { colors } from "@/ui/theme/colors";
@@ -9,6 +11,11 @@ import { DEFAULT_BATTERY_PERCENT, LOW_BATTERY_WARNING_THRESHOLD, SECONDS_PER_HOU
 import { GetHomeSummaryUseCase } from "../../core/usecases/GetHomeSummary.usecase";
 import { GetTicketDetailUseCase } from "@modules/tickets/core/usecases/GetTicketDetail.usecase";
 import { CrewStatus, DayEntry, HomeSummary } from "../../core/entities/HomeSummary.entity";
+
+const ROLE_LABEL: Record<HomeSummary["crewLeaderRole"], (t: Translations["home"]) => string> = {
+  crewLeader: (t) => t.roleCrewLeader,
+  supervisor: (t) => t.roleSupervisor,
+};
 
 export interface HomeBanner {
   icon: string;
@@ -90,6 +97,35 @@ const bannerForStatus = (status: CrewStatus, t: Translations["home"]): HomeBanne
   }
 };
 
+// Picks which active clock-in meal reminder (see MealReminderProvider) to surface on Home when
+// more than one crew member has one outstanding — an overdue crew+supervisor escalation is more
+// urgent than a still-fresh crew-only reminder, so it wins regardless of arrival order.
+const mealReminderBannerFor = (
+  reminders: { workerName: string; audience: "crew" | "crewAndSupervisor" }[],
+  t: Translations["ticketDetail"],
+): HomeBanner | null => {
+  if (reminders.length === 0) return null;
+  const escalated = reminders.find((r) => r.audience === "crewAndSupervisor");
+  if (escalated) {
+    return {
+      icon: "▲",
+      title: t.mealEscalationTitle,
+      body: t.mealEscalationBody(escalated.workerName),
+      bg: colors.offBg,
+      border: colors.offBorder,
+      accent: colors.off,
+    };
+  }
+  return {
+    icon: "◔",
+    title: t.mealReminderTitle,
+    body: t.mealReminderBody,
+    bg: colors.idleBg,
+    border: colors.idleBorder,
+    accent: colors.idle,
+  };
+};
+
 const formatTimer = (totalSeconds: number): string => {
   const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
   const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / 60);
@@ -106,12 +142,15 @@ interface UseHomeViewModelArgs {
 }
 
 export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseHomeViewModelArgs) => {
-  const { homeSummaryReader, ticketsReader } = useDependencies();
+  const { homeSummaryReader, ticketsReader, batteryReader, gpsAvailabilityReader } = useDependencies();
   const timer = useTimer();
   const { push } = useNotifications();
+  const { activeReminders } = useMealReminders();
+  const isOnline = useIsOnline();
   const { strings } = useLanguage();
   const home = strings.home;
   const mock = strings.mockData;
+  const ticketDetail = strings.ticketDetail;
   const [summary, setSummary] = useState<HomeSummary | null>(null);
   const [nextTicketId, setNextTicketId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -120,6 +159,10 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
   const [notifyComposerOpen, setNotifyComposerOpen] = useState(false);
   const [notifyMessage, setNotifyMessage] = useState("");
   const [, forceRerender] = useState(0);
+  // Real device signals, not mock data — both default to "no warning" until the first real
+  // reading arrives (see the showBatteryWarning/showGpsWarning comment below for why).
+  const [batteryPercent, setBatteryPercent] = useState(DEFAULT_BATTERY_PERCENT);
+  const [gpsAvailable, setGpsAvailable] = useState(true);
 
   const load = useCallback(async () => {
     const result = await new GetHomeSummaryUseCase(homeSummaryReader).execute();
@@ -142,39 +185,75 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
     return () => clearInterval(interval);
   }, []);
 
+  // Real, continuously-observed device signals — an initial read plus a live subscription, so
+  // the banners below update the moment the device's actual battery/GPS state changes, not just
+  // on next screen focus.
+  useEffect(() => {
+    batteryReader.getLevelPercent().then((result) => {
+      if (result.success) setBatteryPercent(result.data);
+    });
+    return batteryReader.subscribe(setBatteryPercent);
+  }, [batteryReader]);
+
+  useEffect(() => {
+    gpsAvailabilityReader.isAvailable().then((result) => {
+      if (result.success) setGpsAvailable(result.data);
+    });
+    return gpsAvailabilityReader.subscribe(setGpsAvailable);
+  }, [gpsAvailabilityReader]);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await load();
     setRefreshing(false);
   }, [load]);
 
-  // Both default to "no warning" while summary hasn't loaded yet (full battery assumed, GPS
-  // assumed available) — showing a false-positive warning during the brief initial load would be
-  // worse than a one-tick delay in showing a real one once data arrives.
-  const showBatteryWarning = (summary?.batteryPercent ?? DEFAULT_BATTERY_PERCENT) < LOW_BATTERY_WARNING_THRESHOLD;
-  const showGpsWarning = summary ? !summary.gpsAvailable : false;
+  const showBatteryWarning = batteryPercent < LOW_BATTERY_WARNING_THRESHOLD;
+  const showGpsWarning = !gpsAvailable;
+  const showOfflineWarning = !isOnline;
   const banner = summary ? bannerForStatus(summary.crewStatus, home) : null;
+  const mealReminderBanner = mealReminderBannerFor(activeReminders, ticketDetail);
 
+  // Each day entry (yard/training/shop) gets its own independent timer, keyed off the same
+  // generic engine job/travel already use — id/name/location come from the mock entry, but the
+  // running state, elapsed time, and status/button all derive live from the timer, not the
+  // mock's static placeholder fields (statusText/timer/buttonLabel), matching how job/travel
+  // never trust their own mock "sub" text either.
   const dayItems = (summary?.dayEntries ?? []).map((entry) => {
-    const tone = STATUS_KIND_COLOR[entry.statusKind];
+    const dayTimerId = `day:${entry.id}`;
+    const dayRunning = timer.isRunning(dayTimerId);
+    const daySeconds = timer.getSeconds(dayTimerId);
+    // One-time-per-day timer: once started and then stopped, it's done for the day — locked,
+    // not resumable, until the entry resets (e.g. a future day boundary). Still running counts
+    // as "in progress," not locked, so it can always be stopped.
+    const dayLocked = daySeconds > 0 && !dayRunning;
+    const tone = STATUS_KIND_COLOR[dayRunning ? "job" : "idle"];
     return {
       id: entry.id,
       name: DAY_ENTRY_NAME[entry.id]?.(mock) ?? entry.name,
-      statusText: entry.statusKind === "idle" ? mock.homeNotStarted : entry.statusText,
+      statusText: dayRunning ? strings.travel.running : dayLocked ? home.dayEntryLogged : mock.homeNotStarted,
       statusColor: tone.text,
-      timer: entry.timer,
+      timer: formatTimer(daySeconds),
       location: DAY_ENTRY_LOCATION[entry.id]?.(mock) ?? entry.location,
       startTime: entry.startTime,
       endTime: entry.endTime,
       open: openDayItemId === entry.id,
       onToggleOpen: () => setOpenDayItemId((prev) => (prev === entry.id ? null : entry.id)),
       button: {
-        label: entry.buttonEnabled ? mock.homeStartButton : entry.buttonLabel,
+        label: dayRunning ? home.stopButton : home.startButton,
         bg: tone.bg,
         color: tone.text,
         border: tone.border,
-        opacity: entry.buttonEnabled ? 1 : 0.5,
-        onPress: () => {},
+        opacity: dayLocked ? 0.5 : 1,
+        onPress: () => {
+          if (dayLocked) return;
+          if (dayRunning) timer.pause(dayTimerId);
+          else timer.start(dayTimerId);
+          // Same instant-feedback bump onToggleJob/onJobAction use — the timer engine's context
+          // value is a stable ref, so this hook wouldn't otherwise see the new isRunning() value
+          // until the next 1s poll tick.
+          forceRerender((c) => c + 1);
+        },
       },
     };
   });
@@ -272,12 +351,16 @@ export const useHomeViewModel = ({ onOpenNextJob, onGoRoster, onGoTravel }: UseH
         ? {
             ...summary,
             dateLabel: mock.homeDateLabel,
+            crewLeaderRoleLabel: ROLE_LABEL[summary.crewLeaderRole](home),
             nextJob: { ...summary.nextJob, sub: mock.ticketJobSiteEstimate(String(summary.nextJob.estimatedHours)) },
           }
         : null,
       banner,
+      mealReminderBanner,
+      batteryPercent,
       showBatteryWarning,
       showGpsWarning,
+      showOfflineWarning,
       dayItems,
       refreshing,
       jobButton,

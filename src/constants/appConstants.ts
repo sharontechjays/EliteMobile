@@ -9,10 +9,12 @@ export const MS_PER_SECOND = 1000;
 
 // --- Home / battery ---
 export const DEFAULT_BATTERY_PERCENT = 100;
-// A field crew member losing signal or dying mid-shift is the failure mode this app cares most
-// about — 35% gives enough runway to notice and charge before the device dies outright, well
-// above a bare "critical" threshold (typically ~15-20%).
-export const LOW_BATTERY_WARNING_THRESHOLD = 35;
+export const LOW_BATTERY_WARNING_THRESHOLD = 25;
+
+// --- Home / GPS ---
+// expo-location has no "services enabled changed" event to subscribe to, so availability is
+// polled instead — 5s reads as real-time to a user without hammering the OS location API.
+export const GPS_AVAILABILITY_POLL_INTERVAL_MS = 5000;
 
 // --- Meal break compliance ---
 // A stand-in for the admin-configurable overrides (ADM-6) mentioned in the compliance story,
@@ -34,6 +36,19 @@ export const FIRST_MEAL_MAX_ALERTS = 4;
 export const SECOND_MEAL_CASCADE_START_HOUR = 11;
 export const SECOND_MEAL_ESCALATION_INTERVAL_MINUTES = 15;
 export const SECOND_MEAL_MAX_ALERTS = 4;
+
+// --- Meal reminder feature flag (clock-in cascade) ---
+// Toggle to "testing" while QA-ing the clock-in meal-reminder cascade so it fires in seconds
+// instead of hours; flip back to "production" before demoing/shipping. Stands in for a future
+// admin/remote-config toggle the same way the compliance constants above do.
+export const MEAL_REMINDER_MODE: "production" | "testing" = "testing";
+
+// Testing-mode timings for the clock-in meal reminder cascade — same shape as the production
+// FIRST_MEAL_* cascade above (one crew-only reminder, then escalations up to a max alert count),
+// just compressed to seconds so a tester doesn't have to wait hours to see it fire.
+export const MEAL_REMINDER_TEST_START_SECONDS = 30;
+export const MEAL_REMINDER_TEST_ESCALATION_INTERVAL_SECONDS = 20;
+export const MEAL_REMINDER_TEST_MAX_ALERTS = FIRST_MEAL_MAX_ALERTS;
 
 // --- Timer engine ---
 export const TIMER_TICK_INTERVAL_MS = 1000;
@@ -63,6 +78,10 @@ export const SIGN_IN_ERROR_DISPLAY_MS = 350;
 // as AttestationScreen's TextInput maxLength.
 export const ATTESTATION_MIN_CODE_LENGTH = 4;
 export const ATTESTATION_MAX_CODE_LENGTH = 6;
+// Single shared TimerProvider id for the app-wide "day timer" shown in TopBar on every screen —
+// started by the first IN punch of the day (see useAttestation.viewModel.tsx) and kept running
+// regardless of any individual worker's later clock-outs.
+export const DAY_TIMER_ID = "day-shift";
 
 // --- Splash ---
 // Fake progress bar: starts partially filled (rather than 0) so the splash screen never shows a

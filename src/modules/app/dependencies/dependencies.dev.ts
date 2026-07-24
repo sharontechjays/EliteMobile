@@ -4,6 +4,8 @@ import { LocalAppReadinessAdapter } from "@modules/splash/infrastructure/adapter
 import { LocalDeviceRegistrarAdapter } from "@modules/deviceRegistration/infrastructure/adapters/LocalDeviceRegistrar.adapter";
 import { NativeDeviceIdentityKeyStoreAdapter } from "@modules/deviceRegistration/infrastructure/adapters/NativeDeviceIdentityKeyStore.adapter";
 import { InMemoryHomeSummaryAdapter } from "@modules/home/infrastructure/adapters/InMemoryHomeSummary.adapter";
+import { ExpoBatteryAdapter } from "@modules/home/infrastructure/adapters/ExpoBattery.adapter";
+import { ExpoGpsAvailabilityAdapter } from "@modules/home/infrastructure/adapters/ExpoGpsAvailability.adapter";
 import { InMemorySessionAuthenticatorAdapter } from "@modules/auth/infrastructure/adapters/InMemorySessionAuthenticator.adapter";
 import { InMemoryCrewRosterAdapter } from "@modules/roster/infrastructure/adapters/InMemoryCrewRoster.adapter";
 import { InMemoryPunchRecorderAdapter } from "@modules/clock/infrastructure/adapters/InMemoryPunchRecorder.adapter";
@@ -22,6 +24,10 @@ import { HttpExampleNotesAdapter } from "@modules/apiIntegrationExample/infrastr
 // ones once the clock/sync local store lands.
 export const buildDevDependencies = (): Dependencies => {
   const keyValueStore = new MmkvKeyValueStoreAdapter();
+  // One shared instance bound to both rosterReader and workerStatusRecorder: a confirmed punch
+  // (workerStatusRecorder.applyPunch) mutates the exact same in-memory roster this reads from,
+  // so the roster screen reflects the punch on its next read — see ConfirmAttestation.usecase.ts.
+  const crewRoster = new InMemoryCrewRosterAdapter();
 
   return {
     keyValueStore,
@@ -29,8 +35,11 @@ export const buildDevDependencies = (): Dependencies => {
     deviceRegistrar: new LocalDeviceRegistrarAdapter(keyValueStore),
     deviceIdentityKeyStore: new NativeDeviceIdentityKeyStoreAdapter(),
     homeSummaryReader: new InMemoryHomeSummaryAdapter(),
+    batteryReader: new ExpoBatteryAdapter(),
+    gpsAvailabilityReader: new ExpoGpsAvailabilityAdapter(),
     sessionAuthenticator: new InMemorySessionAuthenticatorAdapter(),
-    rosterReader: new InMemoryCrewRosterAdapter(),
+    rosterReader: crewRoster,
+    workerStatusRecorder: crewRoster,
     punchRecorder: new InMemoryPunchRecorderAdapter(),
     noteSaver: new InMemoryNoteSaverAdapter(),
     ticketsReader: new InMemoryTicketsAdapter(),

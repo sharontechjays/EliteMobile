@@ -2,10 +2,10 @@ import { buildMealBreakCascade, getNextDueMealBreakCheckpoint } from "./deriveMe
 import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/constants/appConstants";
 
 describe("buildMealBreakCascade", () => {
-  it("builds one checkpoint per hour+interval step, first alert using the given audience", () => {
+  it("builds one checkpoint per start+interval step, first alert using the given audience", () => {
     const cascade = buildMealBreakCascade({
-      startHour: 4,
-      escalationIntervalMinutes: 15,
+      startSeconds: 4 * SECONDS_PER_HOUR,
+      escalationIntervalSeconds: 15 * SECONDS_PER_MINUTE,
       maxAlerts: 4,
       firstAlertAudience: "crew",
     });
@@ -20,20 +20,35 @@ describe("buildMealBreakCascade", () => {
 
   it("uses crewAndSupervisor for every checkpoint when that's the first-alert audience too", () => {
     const cascade = buildMealBreakCascade({
-      startHour: 11,
-      escalationIntervalMinutes: 15,
+      startSeconds: 11 * SECONDS_PER_HOUR,
+      escalationIntervalSeconds: 15 * SECONDS_PER_MINUTE,
       maxAlerts: 4,
       firstAlertAudience: "crewAndSupervisor",
     });
 
     expect(cascade.every((checkpoint) => checkpoint.audience === "crewAndSupervisor")).toBe(true);
   });
+
+  it("supports second-scale cascades (e.g. a testing-mode feature flag) with the same builder", () => {
+    const cascade = buildMealBreakCascade({
+      startSeconds: 30,
+      escalationIntervalSeconds: 20,
+      maxAlerts: 3,
+      firstAlertAudience: "crew",
+    });
+
+    expect(cascade).toEqual([
+      { atSeconds: 30, audience: "crew" },
+      { atSeconds: 50, audience: "crewAndSupervisor" },
+      { atSeconds: 70, audience: "crewAndSupervisor" },
+    ]);
+  });
 });
 
 describe("getNextDueMealBreakCheckpoint", () => {
   const cascade = buildMealBreakCascade({
-    startHour: 4,
-    escalationIntervalMinutes: 15,
+    startSeconds: 4 * SECONDS_PER_HOUR,
+    escalationIntervalSeconds: 15 * SECONDS_PER_MINUTE,
     maxAlerts: 4,
     firstAlertAudience: "crew",
   });
