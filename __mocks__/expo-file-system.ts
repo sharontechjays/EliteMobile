@@ -4,10 +4,14 @@
 const existingUris = new Set<string>();
 
 function joinUri(parts: (string | { uri: string })[]): string {
-  return parts
-    .map((part) => (typeof part === "string" ? part : part.uri))
-    .join("/")
-    .replace(/([^:])\/{2,}/g, "$1/");
+  const joined = parts.map((part) => (typeof part === "string" ? part : part.uri)).join("/");
+  // Collapsing duplicate slashes must not touch the scheme separator itself — file:// and
+  // https:// URIs need their own "//" preserved (three total for file:///path) — so only the
+  // portion after the scheme gets deduplicated.
+  const schemeMatch = joined.match(/^([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)(.*)$/);
+  if (!schemeMatch) return joined.replace(/\/{2,}/g, "/");
+  const [, scheme, rest] = schemeMatch;
+  return scheme + rest.replace(/\/{2,}/g, "/");
 }
 
 class FakeFileSystemNode {

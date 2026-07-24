@@ -13,15 +13,18 @@ function isRemoteUri(uri: string): boolean {
   return uri.startsWith("http://") || uri.startsWith("https://");
 }
 
+// Escapes every disallowed character to a unique `_<hex codepoint>_` sequence and passes safe
+// characters through unchanged — a bijective (collision-free) transform, unlike a 32-bit rolling
+// hash, which can (and did) map two distinct URIs onto the same cache filename.
+function sanitizeForFilename(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]/g, (char) => `_${char.charCodeAt(0).toString(16)}_`);
+}
+
 function cacheFileNameFor(uri: string): string {
   const withoutQuery = uri.split("?")[0];
   const extensionMatch = /\.[a-zA-Z0-9]+$/.exec(withoutQuery);
   const extension = extensionMatch ? extensionMatch[0] : DEFAULT_VIDEO_EXTENSION;
-  let hash = 0;
-  for (let i = 0; i < uri.length; i += 1) {
-    hash = (hash * 31 + uri.charCodeAt(i)) | 0;
-  }
-  return `${Math.abs(hash)}${extension}`;
+  return `${sanitizeForFilename(uri)}${extension}`;
 }
 
 async function resolveToLocalUri(uri: string): Promise<string> {
