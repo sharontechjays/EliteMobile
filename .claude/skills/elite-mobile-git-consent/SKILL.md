@@ -61,7 +61,9 @@ here isn't just noise, it's real shared history that then needs a revert or forc
 
 ## Related
 
-For a rule this strict, a `PreToolUse` hook matching `Bash(git commit*)`/`Bash(git push*)` would
-enforce this deterministically instead of relying on judgment each time — see the earlier
-discussion in this project about hooks vs. skills/memory for when to reach for which. This skill is
-the documented policy; a hook would be the enforcement mechanism if stronger guarantees are wanted.
+`.claude/settings.json` already has a `PreToolUse` hook (`require-git-approval.sh`) that
+deterministically enforces this for `git commit *` and `git push *` specifically — those two are
+covered mechanically, not just by judgment. The rest of the Scope list above (branch creation/
+deletion, PR open/merge/close, destructive git ops) has **no matching hook today** and relies on
+this skill being followed by judgment alone — worth closing that gap with additional hook entries
+if stronger guarantees are wanted for those actions too.

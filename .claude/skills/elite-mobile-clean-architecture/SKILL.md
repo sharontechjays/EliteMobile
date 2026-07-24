@@ -6,10 +6,14 @@ description: Use when creating features, refactoring, or reviewing code in the E
 # Elite Mobile — Clean Architecture
 
 Prescriptive architecture for **Elite Mobile**, the field-crew timekeeping prototype for Elite Teams
-Offices. This is a **UI/interaction-fidelity prototype**, not a production build: every adapter is an
-in-memory mock (`InMemory*Adapter`), there is no backend, and no data persists beyond the device's own
-local storage. The clean-architecture boundaries exist so that swapping mocks for real adapters later
-(a REST API, a real sync engine) never touches `core/` or `ui/`.
+Offices. This is a **UI/interaction-fidelity prototype**, not a production build: most feature
+adapters are still in-memory mocks (`InMemory*Adapter`) with no backend, and no data persists beyond
+the device's own local storage. That said, several adapters are already real: `Mmkv*Adapter` for
+local persistence, `Native*Adapter`/`Expo*Adapter` for native device capabilities (media capture,
+device identity, battery, GPS/location availability), and `apiIntegrationExample`'s adapters, which
+are a deliberately isolated real REST + offline-query demo. The clean-architecture boundaries exist
+so that swapping any remaining mock for a real adapter later (a REST API, a real sync engine) never
+touches `core/` or `ui/`.
 
 **Stack:** Expo SDK 54 (New Architecture) • Expo Router (file-based routes in `app/`) • TypeScript strict •
 React Context for cross-cutting state (no Zustand/Redux) • `@tanstack/react-query` for the one real
@@ -23,12 +27,15 @@ React Context.
 
 1. **Core depends on nothing.** `ui/` and `infrastructure/` import from `core/`, never the reverse.
    `core/` never imports React, Expo, or any native module.
-2. **The UI only ever touches usecases, never adapters directly.** ViewModels call usecases via
-   `useDependencies()`; nothing outside `infrastructure/` imports an `*.adapter.ts` file.
-3. **Every module today is mock-backed.** `infrastructure/adapters/InMemory*.adapter.ts` files hold
+2. **`core/` and `ui/` only ever touch usecases, never adapters directly.** ViewModels call usecases
+   via `useDependencies()`; neither layer imports an `*.adapter.ts` file. The composition root
+   (`dependencies.dev.ts`, which wires one concrete adapter per port) and test files (which build
+   hand-written fake `Dependencies` fixtures) are explicit exceptions — importing/constructing
+   concrete adapters is their entire job.
+3. **Most modules today are mock-backed.** `infrastructure/adapters/InMemory*.adapter.ts` files hold
    their state in a plain in-memory array/Map for the life of the app process — nothing survives an
    app restart except what's explicitly persisted via MMKV (device registration, session, sync-queue
-   pending state).
+   pending state) or backed by a real native API (see the intro above for which adapters those are).
 4. **This is not yet an offline-sync product.** There is no outbox, no idempotency keys, no BFF, no
    Acumatica/Workforce Go integration. The `sync` module's Sync Queue screen is a **read-only** view
    over mock data today. See `elite-mobile-offline` for what real offline infrastructure _does_ exist
