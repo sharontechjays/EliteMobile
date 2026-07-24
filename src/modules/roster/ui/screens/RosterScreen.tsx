@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenBackground } from "@/ui/components/organisms/ScreenBackground";
 import { BackButton } from "@/ui/components/atoms/BackButton";
@@ -24,6 +25,20 @@ export function RosterScreen({ onGoHome, onStartAttestation }: RosterScreenProps
   const insets = useSafeAreaInsets();
   const { strings } = useLanguage();
   const t = strings.roster;
+
+  // The Crew tab is a native tab (see (tabs)/_layout.tsx) — switching away from it doesn't
+  // unmount this screen, so a punch confirmed on the attestation screen wouldn't otherwise be
+  // picked up here until the app itself restarts. useFocusEffect re-runs every time this tab
+  // regains focus, not just on mount.
+  useFocusEffect(
+    useCallback(() => {
+      handlers.refetch();
+      // handlers is a fresh object every render, but refetch itself (useRoster's own `load`) is
+      // a stable useCallback — depending on the whole object here would tear down and re-add the
+      // focus listener on every render for no benefit.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [handlers.refetch]),
+  );
 
   return (
     <ScreenBackground>

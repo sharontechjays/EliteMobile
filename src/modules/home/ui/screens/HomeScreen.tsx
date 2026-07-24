@@ -25,8 +25,11 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
   const {
     summary,
     banner,
+    mealReminderBanner,
+    batteryPercent,
     showBatteryWarning,
     showGpsWarning,
+    showOfflineWarning,
     dayItems,
     refreshing,
     jobButton,
@@ -61,8 +64,11 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
         >
           <View style={styles.header}>
             <View>
-              <Text style={[typography.largeDate, { color: colors.ink }]}>{summary.dateLabel}</Text>
-              <Text style={[typography.body, { color: colors.dim }]}>{summary.crewLeaderLine}</Text>
+              <Text style={[typography.largeDate, { color: colors.ink }]}>{summary.crewLeaderName}</Text>
+              <Text style={[typography.body, { color: colors.dim }]}>{summary.crewLeaderRoleLabel}</Text>
+              <Text style={[typography.caption, styles.dateLine, { color: colors.faint }]}>
+                {summary.dateLabel} · {summary.branch}
+              </Text>
             </View>
             <Pressable style={styles.avatar} onPress={onOpenProfile}>
               <Text style={styles.avatarLabel}>{summary.crewLeaderInitials}</Text>
@@ -72,7 +78,7 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
           {showBatteryWarning && (
             <StatusBanner
               icon="▮"
-              title={t.batteryTitle(summary.batteryPercent)}
+              title={t.batteryTitle(batteryPercent)}
               body={t.batteryBody}
               tone={{ bg: colors.offBg, border: colors.offBorder, accent: colors.off }}
             />
@@ -84,6 +90,24 @@ export function HomeScreen({ onOpenNextJob, onOpenProfile, onGoRoster, onGoTrave
               title={t.gpsTitle}
               body={t.gpsBody}
               tone={{ bg: colors.offBg, border: colors.offBorder, accent: colors.off }}
+            />
+          )}
+
+          {showOfflineWarning && (
+            <StatusBanner
+              icon="✕"
+              title={t.offlineTitle}
+              body={t.offlineBody}
+              tone={{ bg: colors.offBg, border: colors.offBorder, accent: colors.off }}
+            />
+          )}
+
+          {mealReminderBanner && (
+            <StatusBanner
+              icon={mealReminderBanner.icon}
+              title={mealReminderBanner.title}
+              body={mealReminderBanner.body}
+              tone={mealReminderBanner}
             />
           )}
 
@@ -156,6 +180,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { gap: 14, paddingHorizontal: 18, paddingBottom: 16 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  dateLine: { marginTop: 3 },
   avatar: {
     width: 36,
     height: 36,

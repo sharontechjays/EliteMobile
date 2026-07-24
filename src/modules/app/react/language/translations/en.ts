@@ -15,6 +15,7 @@ export const en: Translations = {
     synced: "● Synced",
     pending: (count) => `▲ ${count} pending`,
     notificationsA11yLabel: "Notifications",
+    dayTimerA11yLabel: "Time since clock-in today",
   },
 
   notifyOfficePanel: {
@@ -80,6 +81,8 @@ export const en: Translations = {
   },
 
   home: {
+    roleCrewLeader: "Crew leader",
+    roleSupervisor: "Supervisor",
     daySectionLabel: "Day time — yard & training",
     clockSectionLabel: "Clock in / out",
     clockButtonLabel: "Clock In / Out",
@@ -89,6 +92,8 @@ export const en: Translations = {
     gpsTitle: "GPS not available",
     gpsBody:
       "Location is off or has no signal. Travel and geofence arrival won't track — punches will be saved without GPS.",
+    offlineTitle: "No internet connection",
+    offlineBody: "Punches and updates are saved on-device and will sync once you're back online.",
     travellingButton: "→ Travelling…",
     startTravelButton: "→ Start Travel",
     stopButton: "■ Stop",
@@ -109,6 +114,7 @@ export const en: Translations = {
     locationLabel: "Location",
     startTimeLabel: "Start time",
     endTimeLabel: "End time",
+    dayEntryLogged: "Logged for today",
   },
 
   roster: {

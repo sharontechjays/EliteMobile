@@ -55,6 +55,12 @@
     <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Elite Mobile connects to your computer's local development server to load the app while developing.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Elite Mobile uses your location to confirm punches and track travel/geofence arrival.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Elite Mobile uses the microphone to record audio in ticket videos.</string>
     <key>NSPhotoLibraryUsageDescription</key>

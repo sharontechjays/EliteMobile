@@ -30,6 +30,7 @@ export const es: Translations = {
     synced: "● Sincronizado",
     pending: (count) => `▲ ${count} pendiente(s)`,
     notificationsA11yLabel: "Notificaciones",
+    dayTimerA11yLabel: "Tiempo desde la entrada de hoy",
   },
 
   notifyOfficePanel: {
@@ -95,6 +96,8 @@ export const es: Translations = {
   },
 
   home: {
+    roleCrewLeader: "Líder de cuadrilla",
+    roleSupervisor: "Supervisor",
     daySectionLabel: "Horario del día — patio y capacitación",
     clockSectionLabel: "Marcar entrada / salida",
     clockButtonLabel: "Marcar entrada / salida",
@@ -104,6 +107,9 @@ export const es: Translations = {
     gpsTitle: "GPS no disponible",
     gpsBody:
       "La ubicación está apagada o sin señal. El viaje y la llegada por geocerca no se registrarán — las marcaciones se guardarán sin GPS.",
+    offlineTitle: "Sin conexión a internet",
+    offlineBody:
+      "Las marcaciones y actualizaciones se guardan en el dispositivo y se sincronizarán al volver en línea.",
     travellingButton: "→ Viajando…",
     startTravelButton: "→ Iniciar viaje",
     stopButton: "■ Detener",
@@ -125,6 +131,7 @@ export const es: Translations = {
     locationLabel: "Ubicación",
     startTimeLabel: "Hora de inicio",
     endTimeLabel: "Hora de fin",
+    dayEntryLogged: "Registrado por hoy",
   },
 
   roster: {

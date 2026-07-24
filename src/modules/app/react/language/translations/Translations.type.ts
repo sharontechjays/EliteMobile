@@ -20,6 +20,7 @@ export interface Translations {
     synced: string;
     pending: (count: number) => string;
     notificationsA11yLabel: string;
+    dayTimerA11yLabel: string;
   };
 
   notifyOfficePanel: {
@@ -84,6 +85,8 @@ export interface Translations {
   };
 
   home: {
+    roleCrewLeader: string;
+    roleSupervisor: string;
     daySectionLabel: string;
     clockSectionLabel: string;
     clockButtonLabel: string;
@@ -92,6 +95,8 @@ export interface Translations {
     batteryBody: string;
     gpsTitle: string;
     gpsBody: string;
+    offlineTitle: string;
+    offlineBody: string;
     travellingButton: string;
     startTravelButton: string;
     stopButton: string;
@@ -112,6 +117,7 @@ export interface Translations {
     locationLabel: string;
     startTimeLabel: string;
     endTimeLabel: string;
+    dayEntryLogged: string;
   };
 
   roster: {

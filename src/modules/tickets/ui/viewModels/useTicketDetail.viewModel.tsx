@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Linking } from "react-native";
 import * as Crypto from "expo-crypto";
 import { useDependencies } from "@app/react/useDependencies";
@@ -18,6 +18,7 @@ import {
   SECOND_MEAL_ESCALATION_INTERVAL_MINUTES,
   SECOND_MEAL_MAX_ALERTS,
   SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
 } from "@/constants/appConstants";
 import { JobTicket } from "../../core/entities/JobTicket.entity";
 import { TicketAttachment, TicketAttachmentKind } from "../../core/entities/TicketAttachment.entity";
@@ -28,8 +29,8 @@ const MEAL_SUGGEST_AFTER_HOURS = FIRST_MEAL_REMINDER_HOUR;
 // Crew-only reminder at the 4h mark, then crew+supervisor escalations every 15 min up to 4
 // alerts total (4h/4h15/4h30/4h45) — see src/constants/appConstants.ts for the tunable values.
 const FIRST_MEAL_CASCADE = buildMealBreakCascade({
-  startHour: FIRST_MEAL_REMINDER_HOUR,
-  escalationIntervalMinutes: FIRST_MEAL_ESCALATION_INTERVAL_MINUTES,
+  startSeconds: FIRST_MEAL_REMINDER_HOUR * SECONDS_PER_HOUR,
+  escalationIntervalSeconds: FIRST_MEAL_ESCALATION_INTERVAL_MINUTES * SECONDS_PER_MINUTE,
   maxAlerts: FIRST_MEAL_MAX_ALERTS,
   firstAlertAudience: "crew",
 });
@@ -38,8 +39,8 @@ const FIRST_MEAL_CASCADE = buildMealBreakCascade({
 // point), crew+supervisor from the first alert since this is already past the manual flow's
 // own "suggest" nudge.
 const SECOND_MEAL_CASCADE = buildMealBreakCascade({
-  startHour: SECOND_MEAL_CASCADE_START_HOUR,
-  escalationIntervalMinutes: SECOND_MEAL_ESCALATION_INTERVAL_MINUTES,
+  startSeconds: SECOND_MEAL_CASCADE_START_HOUR * SECONDS_PER_HOUR,
+  escalationIntervalSeconds: SECOND_MEAL_ESCALATION_INTERVAL_MINUTES * SECONDS_PER_MINUTE,
   maxAlerts: SECOND_MEAL_MAX_ALERTS,
   firstAlertAudience: "crewAndSupervisor",
 });
@@ -52,6 +53,39 @@ interface UseTicketDetailViewModelArgs {
 
 type MealPhase = "none" | "suggest" | "active" | "done";
 
+interface MealComplianceState {
+  mealPhase: MealPhase;
+  mealBreaksCompletedCount: number;
+  firstMealAlertsFired: number;
+  secondMealAlertsFired: number;
+}
+
+const INITIAL_MEAL_COMPLIANCE_STATE: MealComplianceState = {
+  mealPhase: "none",
+  mealBreaksCompletedCount: 0,
+  firstMealAlertsFired: 0,
+  secondMealAlertsFired: 0,
+};
+
+const mealComplianceStorageKey = (ticketId: string) => `mealCompliance.v1:${ticketId}`;
+
+// Mirrors TimerProvider's own persisted-state pattern: without this, an app crash/kill/restart
+// mid-shift would reset mealPhase and the alert-fired counters back to defaults on next launch,
+// even though the job/meal timers themselves (persisted separately, keyed off a wall-clock
+// startedAt) still correctly remember elapsed time. That mismatch would either re-fire alerts
+// already delivered before the restart, or forget that a break was genuinely in progress.
+function loadPersistedMealCompliance(getString: (key: string) => string | null, ticketId: string): MealComplianceState {
+  const raw = getString(mealComplianceStorageKey(ticketId));
+  if (!raw) return INITIAL_MEAL_COMPLIANCE_STATE;
+  try {
+    return { ...INITIAL_MEAL_COMPLIANCE_STATE, ...(JSON.parse(raw) as Partial<MealComplianceState>) };
+  } catch {
+    // A corrupted/unparseable persisted blob restarts compliance tracking from scratch rather
+    // than crashing this screen.
+    return INITIAL_MEAL_COMPLIANCE_STATE;
+  }
+}
+
 const formatTimer = (totalSeconds: number): string => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -62,14 +96,21 @@ const formatTimer = (totalSeconds: number): string => {
 };
 
 export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: UseTicketDetailViewModelArgs) => {
-  const { ticketsReader, mediaCapture, ticketAttachmentsStore } = useDependencies();
+  const { ticketsReader, mediaCapture, ticketAttachmentsStore, keyValueStore } = useDependencies();
   const timer = useTimer();
   const { push } = useNotifications();
   const { strings } = useLanguage();
   const t = strings.ticketDetail;
   const mock = strings.mockData;
   const [ticket, setTicket] = useState<JobTicket | null>(null);
-  const [mealPhase, setMealPhase] = useState<MealPhase>("none");
+  // Read once per ticket, not per render — loadPersistedMealCompliance is a synchronous MMKV
+  // read, and useState below only consults this initial value on the very first render anyway.
+  const persistedMealCompliance = useMemo(
+    () => loadPersistedMealCompliance(keyValueStore.getString.bind(keyValueStore), ticketId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ticketId],
+  );
+  const [mealPhase, setMealPhase] = useState<MealPhase>(persistedMealCompliance.mealPhase);
   const [, forceRerender] = useState(0);
   const [nextTicketSite, setNextTicketSite] = useState<string | null>(null);
   const [travelPromptDismissed, setTravelPromptDismissed] = useState(false);
@@ -86,9 +127,23 @@ export const useTicketDetailViewModel = ({ ticketId, onGoNotes, onGoTravel }: Us
   const [attachmentErrorIsPermission, setAttachmentErrorIsPermission] = useState(false);
   // How many meal breaks have been fully logged on this ticket so far — determines which
   // automatic compliance cascade (first vs. second) is currently being monitored below.
-  const [mealBreaksCompletedCount, setMealBreaksCompletedCount] = useState(0);
-  const [firstMealAlertsFired, setFirstMealAlertsFired] = useState(0);
-  const [secondMealAlertsFired, setSecondMealAlertsFired] = useState(0);
+  const [mealBreaksCompletedCount, setMealBreaksCompletedCount] = useState(
+    persistedMealCompliance.mealBreaksCompletedCount,
+  );
+  const [firstMealAlertsFired, setFirstMealAlertsFired] = useState(persistedMealCompliance.firstMealAlertsFired);
+  const [secondMealAlertsFired, setSecondMealAlertsFired] = useState(persistedMealCompliance.secondMealAlertsFired);
+
+  // Persists on every change so a crash/kill/restart resumes from exactly where compliance
+  // tracking left off — see loadPersistedMealCompliance above for why this is necessary.
+  useEffect(() => {
+    const value: MealComplianceState = {
+      mealPhase,
+      mealBreaksCompletedCount,
+      firstMealAlertsFired,
+      secondMealAlertsFired,
+    };
+    keyValueStore.setString(mealComplianceStorageKey(ticketId), JSON.stringify(value));
+  }, [ticketId, keyValueStore, mealPhase, mealBreaksCompletedCount, firstMealAlertsFired, secondMealAlertsFired]);
 
   const jobTimerId = `job:${ticketId}`;
   const mealTimerId = `meal:${ticketId}`;

@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useDependencies } from "@app/react/useDependencies";
-import { ATTESTATION_MIN_CODE_LENGTH } from "@/constants/appConstants";
+import { useMealReminders } from "@app/react/mealReminders/useMealReminders";
+import { useTimer } from "@app/react/timer/useTimer";
+import { ATTESTATION_MIN_CODE_LENGTH, DAY_TIMER_ID } from "@/constants/appConstants";
 import { ConfirmAttestationUseCase } from "../../core/usecases/ConfirmAttestation.usecase";
 import { AttestationWorker } from "../../core/entities/AttestationWorker.entity";
 
@@ -11,7 +13,9 @@ interface UseAttestationViewModelArgs {
 }
 
 export const useAttestationViewModel = ({ queue, onDone }: UseAttestationViewModelArgs) => {
-  const { punchRecorder } = useDependencies();
+  const { punchRecorder, workerStatusRecorder } = useDependencies();
+  const { startReminder, stopReminder } = useMealReminders();
+  const timer = useTimer();
   const [index, setIndex] = useState(0);
   const [confirming, setConfirming] = useState(false);
   const [code, setCode] = useState("");
@@ -37,9 +41,19 @@ export const useAttestationViewModel = ({ queue, onDone }: UseAttestationViewMod
     }
 
     setConfirming(true);
-    const usecase = new ConfirmAttestationUseCase(punchRecorder);
+    const usecase = new ConfirmAttestationUseCase(punchRecorder, workerStatusRecorder);
     await usecase.execute(current.id, current.direction);
     setConfirming(false);
+
+    // Clocking IN starts this worker's meal-reminder cascade (see MealReminderProvider);
+    // clocking OUT stops and clears it so a later clock-in restarts fresh.
+    if (current.direction === "IN") startReminder(current.id, current.name);
+    else stopReminder(current.id);
+
+    // The app-wide "day timer" (TopBar, every screen) starts on the day's first IN punch —
+    // timer.start() is a no-op if it's already running, so later punches (this worker or any
+    // other) never restart it, and it keeps ticking regardless of individual clock-outs.
+    if (current.direction === "IN") timer.start(DAY_TIMER_ID);
 
     setCode("");
     setCodeError(false);
@@ -49,7 +63,19 @@ export const useAttestationViewModel = ({ queue, onDone }: UseAttestationViewMod
       return;
     }
     setIndex(index + 1);
-  }, [current, confirming, code, punchRecorder, index, queue.length, onDone]);
+  }, [
+    current,
+    confirming,
+    code,
+    punchRecorder,
+    workerStatusRecorder,
+    startReminder,
+    stopReminder,
+    timer,
+    index,
+    queue.length,
+    onDone,
+  ]);
 
   return {
     state: {

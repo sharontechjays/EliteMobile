@@ -31,6 +31,13 @@ const config: ExpoConfig = {
         microphonePermission: "Elite Mobile uses the microphone to record audio in ticket videos.",
       },
     ],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "Elite Mobile uses your location to confirm punches and track travel/geofence arrival.",
+      },
+    ],
     "./plugins/withFmtConstevalFix",
     "./plugins/withoutPushEntitlement",
   ],
